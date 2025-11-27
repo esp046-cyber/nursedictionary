@@ -1,0 +1,3070 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Filipino Nursing Dictionary</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 1.4em;
+            margin-bottom: 5px;
+        }
+        .header p {
+            opacity: 0.9;
+            font-size: 0.85em;
+        }
+        .search-box {
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+        }
+        .search-input {
+            width: 100%;
+            padding: 10px 15px;
+            font-size: 15px;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            outline: none;
+            transition: all 0.3s;
+        }
+        .search-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+        }
+        .filters {
+            padding: 12px 20px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+        }
+        .filter-btn {
+            padding: 6px 14px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            font-size: 0.8em;
+        }
+        .filter-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+        .filter-btn.active {
+            background: #667eea;
+            color: white;
+        }
+        .stats {
+            padding: 10px 20px;
+            background: #f8f9fa;
+            text-align: center;
+            color: #666;
+            font-size: 0.85em;
+        }
+        .content {
+            padding: 15px 20px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        .term-card {
+            background: #fff;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 12px;
+            transition: all 0.3s;
+        }
+        .term-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102,126,234,0.2);
+        }
+        .term-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .term-word {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #2a5298;
+        }
+        .term-category {
+            background: #667eea;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.7em;
+            font-weight: 600;
+        }
+        .term-translation {
+            color: #666;
+            font-size: 0.95em;
+            margin-bottom: 8px;
+            font-style: italic;
+        }
+        .term-scenario {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 8px;
+            border-left: 4px solid #667eea;
+        }
+        .scenario-title {
+            font-weight: bold;
+            color: #2a5298;
+            margin-bottom: 4px;
+            font-size: 0.85em;
+        }
+        .scenario-text {
+            color: #555;
+            line-height: 1.5;
+            font-size: 0.9em;
+        }
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-size: 1.1em;
+        }
+        .stats {
+            padding: 15px 25px;
+            background: #f8f9fa;
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 Filipino Nursing Dictionary</h1>
+            <p>Essential medical terms with real-world scenarios for Filipino nurses</p>
+        </div>
+        
+        <div class="search-box">
+            <input type="text" class="search-input" id="searchInput" placeholder="Search terms... (e.g., medication, BP, syringe)">
+        </div>
+        
+        <div class="filters">
+            <button class="filter-btn active" data-category="all">All Terms</button>
+            <button class="filter-btn" data-category="vitals">Vital Signs</button>
+            <button class="filter-btn" data-category="meds">Medications</button>
+            <button class="filter-btn" data-category="procedures">Procedures</button>
+            <button class="filter-btn" data-category="equipment">Equipment</button>
+            <button class="filter-btn" data-category="conditions">Conditions</button>
+        </div>
+        
+        <div class="stats" id="stats">Showing all 50 terms</div>
+        
+        <div class="content" id="content"></div>
+    </div>
+
+    <script>
+        const dictionary = [
+            {
+                word: "Blood Pressure",
+                tagalog: "Presyon ng Dugo",
+                category: "vitals",
+                scenario: "Nurse Maria checks the patient's BP: '120/80 po ang presyon ninyo ngayon. Normal po yan.' The patient asks if it's high. Maria explains: 'Hindi po mataas, sakto lang. Kung 140/90 pataas, doon na po tayo mag-alala.'"
+            },
+            {
+                word: "Temperature",
+                tagalog: "Lagnat / Temperatura",
+                category: "vitals",
+                scenario: "A child arrives with fever. Nurse Jenny tells the mother: 'May lagnat po ang bata, 38.5 degrees. Kailangan natin bigyan ng paracetamol at palamigan. Mag-sponge bath po kayo ng maligamgam na tubig, huwag malamig.'"
+            },
+            {
+                word: "Injection",
+                tagalog: "Iniksyon / Turók",
+                category: "procedures",
+                scenario: "Before giving an injection, Nurse Rico says: 'Konting kirot lang po ito. Mag-relax po kayo. Turók ko na po sa braso ninyo ang antibiotic. Huminga po kayo ng malalim... tapos na po!'"
+            },
+            {
+                word: "Pain",
+                tagalog: "Sakit / Kirot",
+                category: "conditions",
+                scenario: "Patient complains: 'Masakit po ang tiyan ko.' Nurse asks: 'Scale of 1-10, gaano po kasakit? Kailan po nagsimula? May kasama po bang pagtatae o pagsusuka?' She documents: 'Patient reports abdominal pain, 7/10 severity.'"
+            },
+            {
+                word: "Medicine / Medication",
+                tagalog: "Gamot",
+                category: "meds",
+                scenario: "During medication rounds: 'Ito po ang gamot ninyo for high blood. Tatlo po ito: pampababa ng presyon, pampatanggal ng tubig sa katawan, at pampalakas ng puso. Inumin po after meals, ha?'"
+            },
+            {
+                word: "IV (Intravenous)",
+                tagalog: "Dextrose / Serum",
+                category: "equipment",
+                scenario: "Nurse inserts IV line: 'Maglalagay po ako ng dextrose sa kamay ninyo para direkta sa ugat ang gamot at tubig. Sabihin po ninyo kung masakit, mamaga, o tumigas ang kamay ninyo.'"
+            },
+            {
+                word: "Bedpan",
+                tagalog: "Arinola",
+                category: "equipment",
+                scenario: "Patient needs bathroom but can't walk: 'Wag po kayong bumangon. Gamitin po natin ang arinola dito sa kama. Tutulong po ako sa inyo. Tawagin ninyo lang ako pag tapos na kayo.'"
+            },
+            {
+                word: "Wound Dressing",
+                tagalog: "Pagbibihis ng Sugat",
+                category: "procedures",
+                scenario: "Changing post-op dressing: 'Papalitan ko po ang takip ng sugat ninyo. Linisin ko muna ng betadine, bago lagyan ng bagong gasa. Masakit po ba? Mukhang gumagaling naman na po ang sugat.'"
+            },
+            {
+                word: "Diabetic",
+                tagalog: "May Diabetes / May Sakit sa Asukal",
+                category: "conditions",
+                scenario: "Patient education: 'May diabetes po kayo, ibig sabihin mataas ang asukal sa dugo ninyo. Kailangan po iwasan ang matamis, kumain ng on-time, mag-exercise, at uminom ng gamot regularly. Check natin blood sugar ninyo araw-araw.'"
+            },
+            {
+                word: "Asthma Attack",
+                tagalog: "Hika / Pagkahinga",
+                category: "conditions",
+                scenario: "Patient wheezing: 'Nahihirapan po kayong huminga? May hika po ba kayo? Umupo po kayo ng maayos, relax. Bibigyan ko kayo ng nebulizer para gumaan ang paghinga ninyo. Huminga po ng malalim at dahan-dahan.'"
+            },
+            {
+                word: "Oxygen",
+                tagalog: "Oxygen / Hangin",
+                category: "equipment",
+                scenario: "Patient has low O2 saturation: 'Mababa po ang oxygen ninyo, kaya lalagyan ko kayo ng oxygen sa ilong. Huwag po tanggalin, kailangan po ito para gumaan ang paghinga at hindi kulang sa hangin ang katawan ninyo.'"
+            },
+            {
+                word: "Wheelchair",
+                tagalog: "Wheelchair / Gulong na Upuan",
+                category: "equipment",
+                scenario: "Discharging patient: 'Sakay po kayo sa wheelchair hanggang sa labas. Hospital policy po na hindi pwedeng maglakad ang patients paglabas. Dadalhin ko po kayo hanggang sa sasakyan ninyo.'"
+            },
+            {
+                word: "Surgery",
+                tagalog: "Operasyon",
+                category: "procedures",
+                scenario: "Pre-op instructions: 'Bukas po ang operasyon ninyo ng appendix. Bawal po kumain o uminom from midnight. Maliligo po kayo ng antibacterial soap. Titigil muna sa gamot para sa dugo.'"
+            },
+            {
+                word: "Discharge",
+                tagalog: "Pauwi na / Palabas na",
+                category: "procedures",
+                scenario: "Patient going home: 'Pwede na po kayong umuwi ngayon. Ito po ang mga gamot ninyo, instructions, at reseta. Balik po kayo next week for follow-up. Tawagan ninyo kami kung may problema.'"
+            },
+            {
+                word: "Visiting Hours",
+                tagalog: "Oras ng Pagbisita",
+                category: "procedures",
+                scenario: "Family arrives late: 'Pasensya na po pero tapos na ang visiting hours, hanggang 8pm lang po. Bukas po kayo bumalik ng 10am. One visitor lang po overnight, dapat immediate family.'"
+            },
+            {
+                word: "Laboratory Test",
+                tagalog: "Laboratory / Lab Test",
+                category: "procedures",
+                scenario: "Drawing blood: 'Kukunan ko po kayo ng dugo para sa CBC at blood chemistry. Kakaunti lang po ito. Fasting po ba kayo? Okay, magugat po ako ng kamay ninyo ngayon.'"
+            },
+            {
+                word: "Hypertension",
+                tagalog: "Mataas na Presyon / Alta Presyon",
+                category: "conditions",
+                scenario: "Patient with BP 160/100: 'Mataas po ang presyon ninyo ngayon. May gamot po ba kayong iniinom? Kumain na po ba kayo ng maalat? Kailangan po natin magpahinga at bantayan ang presyon bawat oras.'"
+            },
+            {
+                word: "Catheter",
+                tagalog: "Tubo sa Ihi / Foley",
+                category: "equipment",
+                scenario: "Inserting urinary catheter: 'Maglalagay po ako ng tubo para sa ihi ninyo kasi hindi kayo makabangon. Dadaluyan niya ang ihi ninyo papunta sa bag na nakasabit sa tabi ng kama. Relax lang po kayo.'"
+            },
+            {
+                word: "Vomiting",
+                tagalog: "Pagsusuka / Nagsusuka",
+                category: "conditions",
+                scenario: "Patient vomiting: 'Ilang beses na po kayong nagsuka? May dugo po ba? Anong kinain ninyo? Pahinga po muna kayo, bibigyan ko kayo ng anti-vomiting medication at walang laman na basong may tubig para magmumog.'"
+            },
+            {
+                word: "Syringe",
+                tagalog: "Injeksyon / Syringe",
+                category: "equipment",
+                scenario: "Preparing insulin: 'Ituturo ko po sa inyo kung paano mag-inject ng insulin gamit ang syringe. Kumuha po ng tamang dose, alisin ang hanging sa loob, at turukan sa tiyan ng 90 degrees.'"
+            },
+            {
+                word: "Pulse Rate",
+                tagalog: "Tibok ng Puso / Pulse",
+                category: "vitals",
+                scenario: "Checking pulse: 'Hihipuin ko lang po ang pulso ninyo dito sa wrist. 78 po ang tibok ng puso ninyo per minute. Normal po yan. Regular naman, walang palaktaw-laktaw.'"
+            },
+            {
+                word: "Ventilator",
+                tagalog: "Breathing Machine / Ventilator",
+                category: "equipment",
+                scenario: "ICU patient: 'Naka-ventilator po ang pasyente, yung machine na tumutulong sa kanya huminga. Hindi po siya makakasagot pero naririnig naman niya kayo. Kausapin ninyo siya.'"
+            },
+            {
+                word: "Monitor",
+                tagalog: "Monitor / Makina",
+                category: "equipment",
+                scenario: "Bedside monitor alarming: 'Yung tumutunog na monitor po, nag-aalarma lang kasi gumagalaw ang pasyente. Okay naman po siya. Automatic po yang tumutunog kapag may galaw. Hindi ibig sabihin may emergency.'"
+            },
+            {
+                word: "Nurse Call Button",
+                tagalog: "Call Bell / Tawag",
+                category: "equipment",
+                scenario: "Orienting new patient: 'Ito pong button, pindutin ninyo kung kailangan ninyo kami. Diretso po yan sa nurses station. Wag po kayong mahiyang tumawag kung may kailangan kayo.'"
+            },
+            {
+                word: "Bedside Commode",
+                tagalog: "Portable Toilet / Inodoro",
+                category: "equipment",
+                scenario: "Patient needs bathroom: 'Hindi pa po kayo pwedeng lumakad papunta sa banyo. Gamitin po natin itong portable toilet na nasa tabi lang ng kama. Tutulong po ako sa inyo tumayo.'"
+            },
+            {
+                word: "Glucose / Blood Sugar",
+                tagalog: "Asukal sa Dugo",
+                category: "vitals",
+                scenario: "Checking blood sugar: 'Tuksukin ko lang po ang daliri ninyo para check ang asukal. Ayy 250 po, mataas. Kailan kayo huling kumain? Kailangan po ng insulin injection ngayon.'"
+            },
+            {
+                word: "NPO (Nothing by Mouth)",
+                tagalog: "Bawal Kumain at Uminom",
+                category: "procedures",
+                scenario: "Pre-op patient: 'NPO po kayo hanggang bukas, meaning bawal kumain o uminom kahit tubig lang. Para ligtas ang anesthesia sa operasyon. Basa lang ng bibig pwede.'"
+            },
+            {
+                word: "Respiration Rate",
+                tagalog: "Bilis ng Paghinga",
+                category: "vitals",
+                scenario: "Counting breaths: 'Bibilan ko lang po ang paghinga ninyo. Huminga po kayo ng normal lang, wag pabago-bago. 18 po per minute. Okay naman po yan, normal range.'"
+            },
+            {
+                word: "Antibiotic",
+                tagalog: "Panglaban sa Bacteria / Antibiotic",
+                category: "meds",
+                scenario: "Starting antibiotics: 'May impeksyon po kayo kaya bibigyan kayo ng antibiotic. Importante po na ubusin ninyo lahat ng tablets kahit gumanda na pakiramdam ninyo, para tuluyang mapatay ang bacteria.'"
+            },
+            {
+                word: "Allergy",
+                tagalog: "Alerhiya",
+                category: "conditions",
+                scenario: "Before giving medication: 'May alerhiya po ba kayo sa gamot? Sa antibiotic? Sa pagkain? Importante po na sabihin ninyo kasi baka mag-react ang katawan ninyo.'"
+            },
+            {
+                word: "Blood Transfusion",
+                tagalog: "Dugo / Pagsalin ng Dugo",
+                category: "procedures",
+                scenario: "Administering blood: 'Magbibigay po kami ng dugo sa inyo kasi mababa ang hemoglobin ninyo. 2-3 hours po ito. Sabihin ninyo agad kung may kati, pantal, hirap huminga, o init sa katawan.'"
+            },
+            {
+                word: "Bedsore / Pressure Ulcer",
+                tagalog: "Sugat sa Likod / Pasmo",
+                category: "conditions",
+                scenario: "Preventing bedsores: 'Papalipat-lipat ko po kayo ng position every 2 hours para hindi kayo magkapasmo sa likod. Yung pasmo, sugat yan dahil sa mahaba kayong nakahiga sa isang pwesto.'"
+            },
+            {
+                word: "Isolation",
+                tagalog: "Hiwalay / Isolation",
+                category: "procedures",
+                scenario: "TB patient: 'Naka-isolate po ang pasyente kasi nakakahawa ang TB niya. Dapat gumamit kayo ng mask pag papasok. Maghugas ng kamay pag labas. Wag malapitan ng buntis at bata.'"
+            },
+            {
+                word: "Nebulizer",
+                tagalog: "Singaw / Nebulizer",
+                category: "equipment",
+                scenario: "For patient with asthma: 'Bibigyan ko po kayo ng nebulizer, parang singaw yan may gamot. 15 minutes po yan, langhap nang malalim hanggang maubos ang gamot sa loob. Para gumaan ang paghinga ninyo.'"
+            },
+            {
+                word: "Vital Signs",
+                tagalog: "Mga Buhay na Senyas",
+                category: "vitals",
+                scenario: "Taking vitals: 'Kukunan ko po ng vital signs ninyo: presyon, temperatura, pulse, at bilis ng paghinga. Standard po ito every 4 hours para ma-monitor kung stable kayo.'"
+            },
+            {
+                word: "Laxative",
+                tagalog: "Pampalabas ng Dumi",
+                category: "meds",
+                scenario: "Constipated patient: 'Ilang araw na po kayong hindi nakakatae? Okay, bibigyan ko kayo ng laxative, pampalabas ng dumi. Inom ninyo mamaya gabi, bukas umaga lalabas na yan.'"
+            },
+            {
+                word: "Drainage",
+                tagalog: "Tubo na Pangdrain",
+                category: "equipment",
+                scenario: "Post-surgery: 'Yang tubo sa tabi ng sugat ninyo, yan ang drainage, nangongolekta yan ng dugo at tubig na lumalabas sa sugat. Pag konti na lang, tatanggalin na namin yan.'"
+            },
+            {
+                word: "Stitches / Sutures",
+                tagalog: "Tahi",
+                category: "procedures",
+                scenario: "Removing stitches: 'Tanggalin ko na po ang tahi ninyo ngayon. Hindi naman po masakit, parang kurot lang. 7 days na po kasi, okay na ang sugat ninyo. Tigil na lang sa tubig ng 1 day.'"
+            },
+            {
+                word: "Infection",
+                tagalog: "Impeksyon",
+                category: "conditions",
+                scenario: "Wound assessment: 'May impeksyon po ang sugat ninyo. Namumula, namamaga, at mainit. May nana rin pong lumalabas. Kailangan ko po linisin at lagyan ng antibiotic cream. Tatawag rin ako ng doctor.'"
+            },
+            {
+                word: "Swelling",
+                tagalog: "Pamamaga / Namamaga",
+                category: "conditions",
+                scenario: "After IV infiltration: 'Namamaga po ang kamay ninyo kung nasaan ang dextrose. Ibig sabihin lumabas ang tubig sa ugat. Tanggalin ko na po ito at lilipat natin sa kabilang kamay.'"
+            },
+            {
+                word: "Crutches",
+                tagalog: "Saklay",
+                category: "equipment",
+                scenario: "Teaching ambulation: 'Gagamitin po ninyo ang saklay for 6 weeks. Ganito po: ilagay sa ilalim ng kili-kili, hawakan ng mahigpit, ilakad pauna ang injured leg kasama ang saklay.'"
+            },
+            {
+                word: "Emergency Room",
+                tagalog: "ER / Emergency",
+                category: "procedures",
+                scenario: "Patient arrives: 'Nasa ER po kayo ngayon. Ina-assess pa namin kung kailangan ninyo ma-admit o pwede nang umuwi. Priority po namin yung mga critical kaya hintay lang po kayo.'"
+            },
+            {
+                word: "Admission",
+                tagalog: "Pagpasok sa Hospital",
+                category: "procedures",
+                scenario: "Admitting patient: 'Ia-admit na po namin kayo sa ward 3. Mag-aasikaso po ako ng papeles at room assignment. Dalhin ko na po kayo sa ward ninyo. May kasama po ba kayong watcher?'"
+            },
+            {
+                word: "Physical Therapy",
+                tagalog: "Ehersisyo / Physical Therapy",
+                category: "procedures",
+                scenario: "After stroke: 'Mag-start na po kayo ng physical therapy para bumalik ang lakas ng kaliwang bahagi ng katawan ninyo. Araw-araw po, tutulungan kayong mag-exercise ng therapist.'"
+            },
+            {
+                word: "Anesthesia",
+                tagalog: "Pampatulog / Anesthesia",
+                category: "procedures",
+                scenario: "Pre-operative: 'Pag nasa operating room na kayo, bibigyan kayo ng anesthesia para makatulog kayo during operation. Hindi po kayo makakaramdam ng kahit ano. Pag gising ninyo, tapos na.'"
+            },
+            {
+                word: "Dialysis",
+                tagalog: "Dialysis / Paglilinis ng Dugo",
+                category: "procedures",
+                scenario: "Kidney failure patient: 'Hindi na po gumagana ng maayos ang kidney ninyo kaya kailangan ninyo mag-dialysis 3x a week. Dito po lilisin ang dugo ninyo gamit ang machine, 4 hours per session.'"
+            },
+            {
+                word: "Referral",
+                tagalog: "Paglipat / Referral",
+                category: "procedures",
+                scenario: "Transferring patient: 'Ire-refer na po namin kayo sa mas malaking hospital kasi wala kaming equipment dito para sa heart surgery ninyo. Isasama ko po lahat ng records ninyo.'"
+            },
+            {
+                word: "Intake and Output",
+                tagalog: "Kinain at Inumin vs Ihi at Tae",
+                category: "procedures",
+                scenario: "Monitoring fluids: 'Sinusukat ko po ang lahat ng iniinom ninyo at lahat ng lumalabas na ihi at tae. Para malaman namin kung balance ba ang tubig sa katawan ninyo o nangungulang.'"
+            },
+            {
+                word: "Specimen Collection",
+                tagalog: "Pagkuha ng Sample",
+                category: "procedures",
+                scenario: "Collecting urine: 'Kailangan ko po ng sample ng ihi ninyo para sa lab test. Ito pong container, ihi kayo dito ng first morning urine. Dalhin po ninyo agad sa lab, huwag iinitan.'"
+            },
+            {
+                word: "Consent Form",
+                tagalog: "Papeles na Pipirmahan",
+                category: "procedures",
+                scenario: "Before procedure: 'Bago po namin kayo i-operaran, pipirmahan ninyo po itong consent form. Binasa ko na sa inyo ang procedure, risks, at benefits. May tanong pa po ba kayo bago kayo pumirma?'"
+            },
+            {
+                word: "Cardiac Arrest",
+                tagalog: "Tumigil ang Puso / Cardiac Arrest",
+                category: "conditions",
+                scenario: "Emergency response: 'Code blue! Tumigil ang puso ng pasyente! Mag-CPR! Dalhin ang crash cart! Charge ang defibrillator sa 200 joules! Clear! Shocking now!'"
+            },
+            {
+                word: "CPR (Cardiopulmonary Resuscitation)",
+                tagalog: "Pagbomba sa Dibdib",
+                category: "procedures",
+                scenario: "Training family: 'Ituturo ko po sa inyo ang CPR. Dalawang kamay sa gitna ng dibdib, pump nang mabilis at malalim, 100-120 times per minute. Sing sa tune ng Staying Alive. After 30 pumps, 2 rescue breaths.'"
+            },
+            {
+                word: "Stroke / CVA",
+                tagalog: "Stroke / Atake sa Utak",
+                category: "conditions",
+                scenario: "Patient arrives: 'Mukhang stroke po ito. Kailan nagsimula ang paninigas ng kaliwang bahagi? Kailangan namin malaman kung within 4.5 hours pa para sa clot buster. Call ang stroke team, stat!'"
+            },
+            {
+                word: "Pneumonia",
+                tagalog: "Pulmonya",
+                category: "conditions",
+                scenario: "Chest X-ray results: 'May pulmonya po kayo sa kaliwang baga. Kaya kayo nahihirapan huminga at may lagnat. Mag-iistart kami ng antibiotics IV, oxygen, at nebulizer. Kailangan ninyo ma-admit.'"
+            },
+            {
+                word: "Dehydration",
+                tagalog: "Kulang sa Tubig / Dehydrated",
+                category: "conditions",
+                scenario: "Child with diarrhea: 'Dehydrated po ang bata ninyo. Tuyo ang labi, walang luha, at baba ang ihi. Maglalagay kami ng IV fluid para bumalik ang tubig sa katawan. Painom din ng oresol.'"
+            },
+            {
+                word: "Insulin",
+                tagalog: "Insulin / Gamot sa Diabetes",
+                category: "meds",
+                scenario: "Teaching injection: 'Turukan po ninyo ang tiyan ng insulin every morning before breakfast. Ganto po: pinch ang balat, 90 degrees, push slowly. Rotate po ang injection site, wag lagi sa iisang lugar.'"
+            },
+            {
+                word: "Chemotherapy",
+                tagalog: "Chemotherapy / Gamot sa Cancer",
+                category: "procedures",
+                scenario: "Starting chemo: 'Mag-start na po ang chemotherapy ninyo ngayon for breast cancer. Side effects: pagsusuka, paglagas ng buhok, pagod. Bibigyan namin kayo ng anti-nausea meds. Normal po ang side effects na yan.'"
+            },
+            {
+                word: "Radiation Therapy",
+                tagalog: "Radiation / Sinag",
+                category: "procedures",
+                scenario: "Explaining treatment: 'Mag-undergo po kayo ng radiation therapy, parang X-ray pero mas malakas para patayin ang cancer cells. 5 days a week for 6 weeks. Hindi po masakit pero pagod kayo afterwards.'"
+            },
+            {
+                word: "Anemia",
+                tagalog: "Kulang sa Dugo / Anemia",
+                category: "conditions",
+                scenario: "Lab results: 'Mababa po ang hemoglobin ninyo, 8 only. May anemia kayo, kulang sa dugo. Kaya kayo nanghihina at naninikip ang dibdib. Kailangan po ng blood transfusion at iron supplements.'"
+            },
+            {
+                word: "Fracture",
+                tagalog: "Bali / Nabalian",
+                category: "conditions",
+                scenario: "X-ray result: 'Nabalian po ang braso ninyo, may fracture. Kailangan namin i-cast para gumaling ng straight. 6 weeks po yan, bawal basain. Painom namin kayo ng pain reliever at calcium.'"
+            },
+            {
+                word: "Cast",
+                tagalog: "Yeso / Cast",
+                category: "equipment",
+                scenario: "Applying cast: 'Lalagyan ko po ng yeso ang bali ninyo. Babasain ko muna, ilalagay sa braso, at tutugas yan. Mag-init po yan sandali, normal lang yan. Huwag basain, kaya niyo mababaho yan.'"
+            },
+            {
+                word: "Sterilization",
+                tagalog: "Pagkakadalisay / Steril",
+                category: "procedures",
+                scenario: "Preparing instruments: 'Lahat po ng instruments na gagamitin sa surgery, dinaan sa sterilization sa autoclave. Para walang bacteria. Bawal hawakan ng bare hands, dapat gloves palagi.'"
+            },
+            {
+                word: "Gloves",
+                tagalog: "Guwantes",
+                category: "equipment",
+                scenario: "Infection control: 'Magsusuot po ako ng gloves bago kayo hipuin kasi may sugat kayo. Standard precaution po ito para sa safety nating pareho. Pagtapos, itatapon ko na ito.'"
+            },
+            {
+                word: "Mask",
+                tagalog: "Maskara",
+                category: "equipment",
+                scenario: "TB patient: 'Magsusuot po kayo ng mask kasi nakakahawa ang sakit ninyo sa hangin. N95 mask po ito, dapat takpan ng buo ang ilong at bibig. Para hindi mahawa ang iba.'"
+            },
+            {
+                word: "Gown",
+                tagalog: "Balabal / Gown",
+                category: "equipment",
+                scenario: "Isolation room: 'Bago pumasok sa kwarto ng pasyente, suotin po ninyo ang gown, gloves, at mask. Full PPE po because may MRSA siya. Pag labas, tanggalin lahat at itapon sa biohazard bin.'"
+            },
+            {
+                word: "Incision",
+                tagalog: "Hiwa / Sugat ng Operasyon",
+                category: "procedures",
+                scenario: "Post-op care: 'Yung incision ninyo, 6 inches long sa tiyan. Closed with staples. Linisin ko po every shift with betadine. Bantayan natin kung may infection. Masakit pa po ba?'"
+            },
+            {
+                word: "Hemorrhage",
+                tagalog: "Dumudugo ng Malakas / Pagdurugo",
+                category: "conditions",
+                scenario: "Emergency: 'May hemorrhage ang pasyente! Dumudugo ng malakas ang sugat! Pressure dressing now! Elevate the leg! Type and cross match for blood! Call the surgeon stat!'"
+            },
+            {
+                word: "Shock",
+                tagalog: "Shock / Bagsak ang Presyon",
+                category: "conditions",
+                scenario: "Critical patient: 'May shock ang pasyente, BP 60/40. Lumiit ang urine output. Malamig ang kamay at paa. Two large bore IV lines! Push fluids! Naka-trendelenburg position! Call MICU!'"
+            },
+            {
+                word: "ICU (Intensive Care Unit)",
+                tagalog: "ICU / Intensive Care",
+                category: "procedures",
+                scenario: "Transferring patient: 'Ililipat na po namin ang pasyente sa ICU kasi kailangan ng mas mataas na level of care. May one-on-one nurse siya doon, mas mabantayan. Limited ang visitors, 10 minutes lang.'"
+            },
+            {
+                word: "Intubation",
+                tagalog: "Paglalagay ng Tubo sa Lalamunan",
+                category: "procedures",
+                scenario: "Preparing for intubation: 'Iintubo na namin ang pasyente kasi hindi na siya makahinga ng maayos. Lalagyan namin ng tubo sa lalamunan connected sa ventilator. Sedate namin siya para hindi siya masaktan.'"
+            },
+            {
+                word: "Tracheostomy",
+                tagalog: "Butas sa Leeg para Huminga",
+                category: "procedures",
+                scenario: "Trach care: 'May tracheostomy ang pasyente, butas sa leeg connected sa breathing tube. Linisin natin ito twice a day, palitan ang inner cannula. Suction every 2 hours or as needed.'"
+            },
+            {
+                word: "NG Tube (Nasogastric Tube)",
+                tagalog: "Tubo sa Ilong Papunta sa Tiyan",
+                category: "equipment",
+                scenario: "Inserting NG tube: 'Maglalagay po ako ng tubo sa ilong ninyo papunta sa tiyan para sa feeding. Uncomfortable po ito sandali. Lumonok po kayo pag sinabi ko. Hinga sa ilong.'"
+            },
+            {
+                word: "Feeding Tube",
+                tagalog: "Tubo Pampakain",
+                category: "equipment",
+                scenario: "Tube feeding: 'Hindi po kayo pwedeng kumain sa bibig dahil sa stroke, kaya feeding tube. Daan dito ang pagkain every 4 hours. Liquid food po, may vitamins na lahat yan.'"
+            },
+            {
+                word: "EKG/ECG (Electrocardiogram)",
+                tagalog: "Koryente ng Puso / EKG",
+                category: "procedures",
+                scenario: "Taking EKG: 'Mag-EKG po tayo, check natin ang koryente ng puso ninyo. Lagyan ko lang ng patches sa dibdib, wrists, at ankles. Hindi po masakit, walang kuryente papasok sa inyo, record lang ito.'"
+            },
+            {
+                word: "Ultrasound",
+                tagalog: "Ultrasound / Tingnan ang Loob",
+                category: "procedures",
+                scenario: "Pregnancy ultrasound: 'Mag-uultrasound po tayo para tingnan ang baby. Lagyan ko lang ng gel sa tiyan, tapos i-scan. Makikita po ninyo sa screen ang baby. Pakinggan din natin ang heartbeat.'"
+            },
+            {
+                word: "CT Scan",
+                tagalog: "CT Scan",
+                category: "procedures",
+                scenario: "Before CT: 'Mag-CT scan po kayo ng utak para tingnan kung may stroke. Hihiga po kayo sa machine, papasok sa tunnel. Walang sakit, wag lang gumalaw. 10 minutes lang. May dye po sa IV.'"
+            },
+            {
+                word: "MRI",
+                tagalog: "MRI",
+                category: "procedures",
+                scenario: "MRI prep: 'Mag-MRI po kayo. Tanggalin po lahat ng metal - hikaw, relo, hairpin. Napakalakas ng magnet. Maingay po inside, bibigyan namin kayo ng earplugs. 30-45 minutes po yan.'"
+            },
+            {
+                word: "Biopsy",
+                tagalog: "Kumuha ng Sample ng Laman",
+                category: "procedures",
+                scenario: "Breast biopsy: 'Kukunan namin ng sample yung bukol sa suso ninyo para i-check kung cancer. Local anesthesia lang, gising kayo. Kurot lang, tapos kukunan ng konting tissue. Results in 1 week.'"
+            },
+            {
+                word: "Colonoscopy",
+                tagalog: "Tingin sa Bituka Gamit ang Camera",
+                category: "procedures",
+                scenario: "Pre-colonoscopy: 'Bukas po ang colonoscopy ninyo. Inumin ninyo tonight ang laxative para lumabas lahat ng dumi. Bawal kumain, tubig lang. Ipapasok namin ang camera sa puwet para tingnan ang colon.'"
+            },
+            {
+                word: "Endoscopy",
+                tagalog: "Camera sa Tiyan",
+                category: "procedures",
+                scenario: "Upper endoscopy: 'Ipapasok namin ang camera sa bibig ninyo papunta sa tiyan para tingnan kung bakit kayo nagsusuka ng dugo. Sedate namin kayo, hindi niyo maalala. Sore throat lang after.'"
+            },
+            {
+                word: "Resuscitation",
+                tagalog: "Pagligtas / Resuscitation",
+                category: "procedures",
+                scenario: "Code situation: 'Nag-code ang pasyente! Start resuscitation! Mag-CPR! Charge the defib! Push epi! Continue chest compressions! Don't stop! Check rhythm! Analyze!'"
+            },
+            {
+                word: "DNR (Do Not Resuscitate)",
+                tagalog: "Huwag Buhayin Pa",
+                category: "procedures",
+                scenario: "Family meeting: 'Gusto ba ninyo ng DNR order para sa lolo ninyo? Meaning, pag tumigil ang puso, hindi na namin siya ire-resuscitate. Hayaan na lang siyang makapahinga. It's a difficult decision.'"
+            },
+            {
+                word: "Palliative Care",
+                tagalog: "Pag-aalaga para Gumaan ang Hirap",
+                category: "procedures",
+                scenario: "Terminal patient: 'Mag-shift na po tayo sa palliative care. Hindi na po natin papagalingin ang sakit, pero papagaanin natin ang sakit at paghihirap ninyo. Priority ang comfort at dignity ninyo.'"
+            },
+            {
+                word: "Hospice",
+                tagalog: "Pag-aalaga sa Huling Araw",
+                category: "procedures",
+                scenario: "End of life: 'Ililipat na po natin sa hospice ang nanay ninyo. Doon po, pag-aalagaan siya with dignity sa huling mga araw niya. Walang aggressive treatment na, comfort care na lang.'"
+            },
+            {
+                word: "IV Piggyback",
+                tagalog: "Kadugtong ng Dextrose",
+                category: "equipment",
+                scenario: "Giving antibiotics: 'Idikit ko lang po itong antibiotic sa dextrose ninyo, tinatawag nating piggyback. 30 minutes lang to tumagas, tapos balik na sa regular dextrose ninyo. Sabihin ninyo kung may kati.'"
+            },
+            {
+                word: "IV Push",
+                tagalog: "Itulak sa Dextrose",
+                category: "procedures",
+                scenario: "Emergency medication: 'Itu-tulak ko na po sa dextrose ninyo ang pain reliever. Directly sa ugat, mabilis ang effect. Mga 5 minutes, makakaramdam na kayo ng relief sa sakit.'"
+            },
+            {
+                word: "Shift Endorsement",
+                tagalog: "Paghahatid ng Pasyente sa Susunod na Nurse",
+                category: "procedures",
+                scenario: "Change of shift: 'Endorsement: Patient A, 65 years old, post-op appendectomy day 2. Vital signs stable, pain 3/10. May take out stitches tomorrow. Naka-soft diet na. Walang fever since morning.'"
+            },
+            {
+                word: "Rounds",
+                tagalog: "Pag-ikot ng Doctor",
+                category: "procedures",
+                scenario: "Doctor rounds: 'Dadaan po ang doctor ninyo for rounds mamaya ng 8am. Itatanong niya kung kumusta kayo, titingnan ang sugat. Prep po kayo ng mga tanong ninyo kung meron.'"
+            },
+            {
+                word: "Sponge Bath",
+                tagalog: "Punas / Sponge Bath",
+                category: "procedures",
+                scenario: "Bedridden patient: 'Pupunasan ko po kayo ngayon ng maligamgam na tubig at sabon. Hindi pa po kayo pwedeng maligo sa shower kasi kakatapos lang ng operation. Comfortable naman po ba ang temperature ng tubig?'"
+            },
+            {
+                word: "Restraints",
+                tagalog: "Pagkakabit / Pagka-tie",
+                category: "equipment",
+                scenario: "Confused patient: 'Kakabitan ko po ng soft restraints ang kamay ninyo kasi nag-aalangan po kayo at hinihila ninyo ang tubes. Para lang sa safety ninyo. Every 2 hours ko po kakalagyan at che-check.'"
+            },
+            {
+                word: "Side Rails",
+                tagalog: "Railings ng Kama",
+                category: "equipment",
+                scenario: "Fall risk patient: 'Itataas ko po ang side rails ng kama ninyo kasi may risk kayo mahulog. Wag po kayong bumaba ng kama nang mag-isa. Tawagan ninyo lang kami para tulungan kayo.'"
+            },
+            {
+                word: "Wound Irrigation",
+                tagalog: "Paghugas ng Sugat",
+                category: "procedures",
+                scenario: "Cleaning wound: 'Huhugasan ko po ng NSS ang sugat ninyo gamit ang syringe para malinis ang nana. Masakit po konti. After, lagyan ng betadine at bagong gauze. Araw-araw po natin gagawin ito.'"
+            },
+            {
+                word: "Suction",
+                tagalog: "Pagsipsip / Suction",
+                category: "procedures",
+                scenario: "Trach patient: 'Sisipsipin ko po ang plema sa tubo ninyo gamit ang suction. Makikita ninyong papasok ang catheter, may tunog. Sandali lang, wag kabahan. Para makahinga kayo ng maayos.'"
+            },
+            {
+                word: "Vital Signs Monitor",
+                tagalog: "Monitor ng mga Buhay na Senyas",
+                category: "equipment",
+                scenario: "Orienting patient: 'Yang monitor po sa tabi ninyo, naka-display dyan ang presyon, pulse, oxygen, at temperature ninyo. Automatic po yan nag-rerecord. Pag may tumunog na alarm, check lang namin agad.'"
+            },
+            {
+                word: "Hemoglobin",
+                tagalog: "Dugo sa Loob / Hemoglobin",
+                category: "vitals",
+                scenario: "Lab result: 'Mababa po ang hemoglobin ninyo, 7 g/dL. Normal ay 12-16. Kaya kayo nanghihina at naninikip ang dibdib. Kailangan po ng blood transfusion at iron supplements.'"
+            },
+            {
+                word: "Platelet Count",
+                tagalog: "Bilang ng Platelet",
+                category: "vitals",
+                scenario: "Dengue patient: 'Bumaba po ang platelet count ninyo to 50,000. Normal ay 150,000-400,000. Dahil sa dengue yan. Bantayan natin baka bumaba pa. Pag 20,000 below, blood transfusion na.'"
+            },
+            {
+                word: "White Blood Cell Count",
+                tagalog: "Puting Dugo / WBC",
+                category: "vitals",
+                scenario: "Infection workup: 'Mataas po ang white blood cells ninyo, 15,000. Normal lang ay hanggang 10,000. Sign po yan ng infection sa katawan. Kaya may lagnat at sakit kayo.'"
+            },
+            {
+                word: "Urinalysis",
+                tagalog: "Pagsusuri ng Ihi",
+                category: "procedures",
+                scenario: "UTI patient: 'May bacteria po sa ihi ninyo based sa urinalysis. May urinary tract infection kayo. Kaya masakit pag umihi at madalas kayo umihi. Antibiotic po ang kailangan.'"
+            },
+            {
+                word: "Stool Exam",
+                tagalog: "Pagsusuri ng Tae",
+                category: "procedures",
+                scenario: "Diarrhea patient: 'Kukunan namin ng sample ang tae ninyo para i-check kung may bacteria, parasites, o amoeba. Lagyan lang po sa container na ito, direct po sa lab.'"
+            },
+            {
+                word: "Blood Culture",
+                tagalog: "Kultura ng Dugo",
+                category: "procedures",
+                scenario: "Sepsis workup: 'Kukunan namin ng dugo ninyo for blood culture para malaman kung anong bacteria ang nagdudulot ng infection. Results po ay 3-5 days. Mag-iistart muna kami ng broad spectrum antibiotics.'"
+            },
+            {
+                word: "Enema",
+                tagalog: "Pampurga / Enema",
+                category: "procedures",
+                scenario: "Constipated patient: 'Bibigyan ko po kayo ng enema, parang tubig na ipapasok sa puwet para lumabas ang dumi. Uncomfortable po sandali pero effective yan. Hihiga kayo sa side, relax lang.'"
+            },
+            {
+                word: "Suppository",
+                tagalog: "Gamot na Ipapasok sa Puwet",
+                category: "meds",
+                scenario: "For fever: 'Ipapasok ko po itong suppository sa puwet ninyo kasi nagsusuka kayo at hindi makain ng gamot. Mabilis mag-absorb dito. Para sa lagnat yan. Relax lang po kayo.'"
+            },
+            {
+                word: "Eye Drops",
+                tagalog: "Patak sa Mata",
+                category: "meds",
+                scenario: "Post-cataract surgery: 'Tatakan ko po ang mata ninyo ng antibiotic drops. Tingala po kayo, titingnan ko sa kisame. Wag kumurap. Ituloy ko na po... tapos na. 4x a day po yan.'"
+            },
+            {
+                word: "Ear Drops",
+                tagalog: "Patak sa Tainga",
+                category: "meds",
+                scenario: "Ear infection: 'May impeksyon po ang tainga ninyo. Patatakan ko ng antibiotic ear drops. Hihiga po kayo ng side, tutulo ko sa loob, tapos mag-stay kayo ng 5 minutes para pumasok.'"
+            },
+            {
+                word: "Nasal Cannula",
+                tagalog: "Tubo ng Oxygen sa Ilong",
+                category: "equipment",
+                scenario: "Giving oxygen: 'Lalagyan ko po kayo ng nasal cannula, dalawang prongs sa ilong para sa oxygen. 2 liters per minute lang, konti lang. Huwag tanggalin, kailangan ninyo yan continuously.'"
+            },
+            {
+                word: "Oxygen Mask",
+                tagalog: "Maskara ng Oxygen",
+                category: "equipment",
+                scenario: "Respiratory distress: 'Papalitan ko na ang nasal cannula ninyo ng oxygen mask kasi hindi pa rin enough ang oxygen ninyo. Mas maraming oxygen mapupunta dito. Cover niya ang ilong at bibig.'"
+            },
+            {
+                word: "Incentive Spirometer",
+                tagalog: "Gamit para sa Deep Breathing",
+                category: "equipment",
+                scenario: "Post-op teaching: 'Gamitin ninyo itong spirometer every hour para mag-deep breathing. Hingin nang malalim hanggang umabot sa goal. Para hindi mag-pneumonia ang baga ninyo after surgery.'"
+            },
+            {
+                word: "Peak Flow Meter",
+                tagalog: "Sukatan ng Hininga",
+                category: "equipment",
+                scenario: "Asthma patient: 'Hipan ninyo nang malakas itong peak flow meter. Sinusukat niya kung gaano kabilis kayo makapag-blow out ng hangin. Para malaman natin kung controlled ba ang asthma ninyo.'"
+            },
+            {
+                word: "Sequential Compression Device",
+                tagalog: "Boot na Pumipindot sa Binti",
+                category: "equipment",
+                scenario: "DVT prevention: 'Isusuot ko po sa binti ninyo itong boots na mag-iinflate and deflate. Para kumilos ang dugo at hindi mag-clot habang nakahiga kayo. Walang sakit yan, parang massage lang.'"
+            },
+            {
+                word: "Anti-Embolism Stockings",
+                tagalog: "Medyas na Mahigpit / TED Hose",
+                category: "equipment",
+                scenario: "Post-surgery: 'Isusuot ko po ang tight stockings na ito hanggang sa hita ninyo. Para hindi mag-blood clot sa binti. Mahigpit pero ganyan talaga dapat. Buong araw ninyo suotin.'"
+            },
+            {
+                word: "Walker",
+                tagalog: "Walker / Pangtulak na Kasangkapan",
+                category: "equipment",
+                scenario: "Ambulation training: 'Gagamitin ninyo ang walker habang naghihilom pa ang bali ninyo. Ganito: lift, step, step. Hawakan nang mahigpit. Wag sobrang mabilis. Balanse lang.'"
+            },
+            {
+                word: "Cane",
+                tagalog: "Tungkod",
+                category: "equipment",
+                scenario: "Discharge planning: 'Kailangan ninyo ng cane for support habang mahinang pa ang tuhod. Hawakan sa kamay na nasa strong side. Unahan ang cane, tapos weak leg, tapos strong leg.'"
+            },
+            {
+                word: "Commode",
+                tagalog: "Portable na Inodoro",
+                category: "equipment",
+                scenario: "For weak patient: 'Ilalagay ko po ang commode sa tabi ng kama ninyo. Portable toilet po ito. Pag kailangan ninyo umihi o tumae, hindi na kayo malayo, dito na lang. Tutulong ako sa inyo tumayo.'"
+            },
+            {
+                word: "Foley Catheter",
+                tagalog: "Tubo sa Ihi na Nakakabit",
+                category: "equipment",
+                scenario: "Post-op care: 'May foley catheter po kayo, tubo sa ihi connected sa bag. Alagaan po ninyo, wag hilahin. Dapat lagi mas mababa ang bag sa bladder. Ilalabas namin yan pag kaya ninyo na maglakad.'"
+            },
+            {
+                word: "Colostomy",
+                tagalog: "Butas sa Tiyan para sa Tae",
+                category: "procedures",
+                scenario: "Post-colostomy: 'May colostomy po kayo, butas sa tiyan connected sa intestine. Dito lalabas ang tae sa bag. Papalitan namin ang bag every day. Ituturo ko sa inyo paano mag-care nito sa bahay.'"
+            },
+            {
+                word: "Wound Vac",
+                tagalog: "Suction sa Sugat",
+                category: "equipment",
+                scenario: "Wound care: 'May wound vac po ang sugat ninyo, naka-suction yan continuously para lumabas ang nana at gumaling nang mabilis. May sponge sa loob, black foam yan. Pag puno ang canister, papalitan namin.'"
+            },
+            {
+                word: "Glucometer",
+                tagalog: "Sukatan ng Asukal",
+                category: "equipment",
+                scenario: "Teaching glucose monitoring: 'Ituturo ko po sa inyo paano mag-check ng blood sugar using glucometer. Prick ang finger, lagay ang dugo sa strip, wait 5 seconds. Dapat below 140 after meals.'"
+            },
+            {
+                word: "Blood Pressure Cuff",
+                tagalog: "Pang-BP / Cuff",
+                category: "equipment",
+                scenario: "Teaching home monitoring: 'Bili kayo ng automatic BP cuff para ma-monitor ninyo sa bahay ang presyon. Ikabit sa braso, press lang ang button. I-log ninyo sa notebook, dalhin pag follow-up.'"
+            },
+            {
+                word: "Thermometer",
+                tagalog: "Pansukol ng Lagnat",
+                category: "equipment",
+                scenario: "Discharge teaching: 'Bumili kayo ng digital thermometer. Ilagay sa ilalim ng dila o sa kilikili. Pag 37.5 pataas, may lagnat na. Painom ng paracetamol at sponge bath ng maligamgam na tubig.'"
+            },
+            {
+                word: "Heating Pad",
+                tagalog: "Mainit na Pandikit",
+                category: "equipment",
+                scenario: "For muscle pain: 'Ilalagay ko po ang heating pad sa likod ninyo para sa sakit ng kalamnan. Mainit lang, hindi mapapaso. 20 minutes on, 20 minutes off. Sabihin po ninyo kung sobrang init.'"
+            },
+            {
+                word: "Ice Pack",
+                tagalog: "Yelo / Ice Pack",
+                category: "equipment",
+                scenario: "For swelling: 'Ilalagay ko po ang ice pack sa namaga ninyong ankle. 15 minutes lang kasi masyadong malamig. Balot ko ng tuwalya. Aalisin ko after, then ulit maya-maya.'"
+            },
+            {
+                word: "Traction",
+                tagalog: "Kaladkad / Traction",
+                category: "procedures",
+                scenario: "Fracture management: 'May traction po ang bali ninyo, bigat yan na nakakabit para manatiling straight ang buto habang gumagaling. Bawal tanggalin. Wag gumalaw ng masyado.'"
+            },
+            {
+                word: "Chest Tube",
+                tagalog: "Tubo sa Dibdib",
+                category: "equipment",
+                scenario: "Post-thoracotomy: 'May chest tube po kayo sa gilid ng dibdib para lumabas ang hangin at dugo sa pleural space. May bubbles sa underwater seal. Normal yan. Aalisin namin pag konti na lang.'"
+            },
+            {
+                word: "Pulse Oximeter",
+                tagalog: "Sukatan ng Oxygen",
+                category: "equipment",
+                scenario: "Monitoring oxygen: 'Ikakabit ko po sa daliri ninyo itong pulse oximeter. Sinusukat niya ang oxygen level sa dugo at pulse rate. Display dyan. Normal ay 95-100%. Pag bumaba ng 90, sasabihin ninyo.'"
+            },
+            {
+                word: "Gastrostomy Tube",
+                tagalog: "Tubo Direkta sa Tiyan",
+                category: "equipment",
+                scenario: "G-tube feeding: 'May G-tube po kayo, tubo direkta sa tiyan. Dito po kami magbibigay ng feeding every 4 hours. Liquid food. May button sa labas, alagaan ninyo, linisin around the site daily.'"
+            },
+            {
+                word: "Pain Scale",
+                tagalog: "Sukatan ng Sakit",
+                category: "vitals",
+                scenario: "Pain assessment: 'Scale of 1-10, gaano po kasakit? 1 is walang sakit, 10 is sobrang sakit na di mo na kaya. Saan po eksaktong masakit? Anong klase ng sakit, tumitikim ba o sumasakit lang?'"
+            },
+            {
+                word: "Pressure Injury",
+                tagalog: "Sugat dahil sa Presyon / Bed Sore",
+                category: "conditions",
+                scenario: "Stage 2 pressure injury: 'May sugat na po ang likod ninyo dahil sa pressure. Namumula at butas na. Kailangan natin linisin at lagyan ng special dressing. Papalipat-lipat ko position ninyo every 2 hours.'"
+            },
+            {
+                word: "Decubitus Ulcer",
+                tagalog: "Sugat sa Likod / Pasmo",
+                category: "conditions",
+                scenario: "Prevention teaching: 'Para hindi kayo magka-decubitus ulcer or pasmo, kailangan every 2 hours change position. Paggalaw-galaw din ng katawan. Use air mattress. Keep skin dry and clean.'"
+            },
+            {
+                word: "Ventilator Settings",
+                tagalog: "Settings ng Breathing Machine",
+                category: "equipment",
+                scenario: "ICU report: 'Naka-ventilator ang pasyente, settings: AC mode, TV 450, RR 16, FiO2 40%, PEEP 5. Synchronized naman siya. Sedation score 3. Plan is to wean tomorrow if stable.'"
+            },
+            {
+                word: "Code Status",
+                tagalog: "Desisyon kung Buhayin o Hindi",
+                category: "procedures",
+                scenario: "Admission: 'Ano po ang code status niya? Full code o DNR? Full code meaning bubuhayin natin pag mag-cardiac arrest. DNR is hindi na, comfort care na lang. Usap ninyo ng family.'"
+            },
+            {
+                word: "Rapid Response Team",
+                tagalog: "Emergency Team / Rapid Response",
+                category: "procedures",
+                scenario: "Deteriorating patient: 'Tawagin ninyo ang rapid response team! Bumaba ang BP to 70/40, hindi na nag-rerespond! RRT code! Need assessment now! Possible sepsis!'"
+            },
+            {
+                word: "Fall Risk",
+                tagalog: "Panganib na Mahulog",
+                category: "conditions",
+                scenario: "Assessment: 'High fall risk po kayo base sa assessment. Elderly, may hilo, at mahina. Itatabi ko bed mo sa wall, taas ang side rails, call bell sa tabi. Tawag lang pag bababa ng kama.'"
+            },
+            {
+                word: "Aspiration Precautions",
+                tagalog: "Pagiwas sa Paglanghap",
+                category: "procedures",
+                scenario: "Dysphagia patient: 'Risk kayo for aspiration, baka mapunta ang pagkain sa baga. Kaya uupo kayo ng 90 degrees pag kumakain, thickened liquids, small bites, chin tuck. Bantayan ko kayo habang kumakain.'"
+            },
+            {
+                word: "Seizure Precautions",
+                tagalog: "Pagiwas sa Atake",
+                category: "procedures",
+                scenario: "Epilepsy patient: 'Naka-seizure precautions po kayo. Padded ang side rails, may suction at oxygen sa tabi, bed is low position. Pag nag-seizure, wag pipigilan, side lying lang, protect head, time it.'"
+            },
+            {
+                word: "Isolation Precautions",
+                tagalog: "Paghihiwalay / Isolation",
+                category: "procedures",
+                scenario: "MDRO patient: 'Contact isolation po kayo. Lahat ng papasok, dapat gown and gloves. Dedicated equipment sa loob lang. Pag labas, tanggal PPE sa loob, hand hygiene. Para di kumalat ang bacteria.'"
+            },
+            {
+                word: "Tuberculosis (TB)",
+                tagalog: "Tuberkulosis / TB",
+                category: "conditions",
+                scenario: "TB diagnosis: 'May TB po kayo sa baga. Nakakahawa yan through hangin kaya kailangan ninyo mag-isolate 2 weeks habang nag-start ng medication. 6 months po ang treatment, kailangan ubusin lahat.'"
+            },
+            {
+                word: "HIV/AIDS",
+                tagalog: "HIV / AIDS",
+                category: "conditions",
+                scenario: "Confidential result: 'Positive po ang HIV test ninyo. Kailangan ninyo mag-start ng antiretroviral therapy. Confidential po ito. May support groups kami. Makakabuhay po kayo ng normal with proper treatment.'"
+            },
+            {
+                word: "Hepatitis",
+                tagalog: "Hepatitis / Sakit sa Atay",
+                category: "conditions",
+                scenario: "Hepatitis B positive: 'May hepatitis B po kayo, virus sa liver. Nakakahawa through dugo. Kailangan regular monitoring ng liver function. Iwasan ang alak. May vaccine para sa family ninyo.'"
+            },
+            {
+                word: "Sepsis",
+                tagalog: "Sepsis / Impeksyon sa Dugo",
+                category: "conditions",
+                scenario: "Septic patient: 'May sepsis po ang pasyente, widespread infection sa buong katawan. Blood culture stat, start broad spectrum antibiotics, fluid resuscitation, monitor hourly. Transfer to ICU now.'"
+            },
+            {
+                word: "Meningitis",
+                tagalog: "Meningitis / Impeksyon sa Utak",
+                category: "conditions",
+                scenario: "Suspected meningitis: 'May stiff neck, mataas na lagnat, at sakit ng ulo. Possible meningitis. Lumbar puncture for CSF analysis. Start antibiotics immediately. Droplet precautions. Critical emergency po ito.'"
+            },
+            {
+                word: "Appendicitis",
+                tagalog: "Apendisitis / Namamagang Apendiks",
+                category: "conditions",
+                scenario: "ER patient: 'Masakit po ang lower right abdomen ninyo, sumuka kayo, at may lagnat. Possible appendicitis. Kailangan ng blood test at ultrasound. Baka kailangan operahan agad if confirmed.'"
+            },
+            {
+                word: "Gallstones",
+                tagalog: "Bato sa Apdo",
+                category: "conditions",
+                scenario: "Cholecystitis patient: 'May bato po sa apdo ninyo. Kaya sumasakit ang upper right abdomen especially after kumain ng mataba. Kailangan po operahan, tanggalin ang gallbladder. Elective surgery po yan.'"
+            },
+            {
+                word: "Kidney Stones",
+                tagalog: "Bato sa Bato",
+                category: "conditions",
+                scenario: "Renal colic: 'May bato po sa kidney ninyo, kumakapit sa ureter. Sobrang sakit nito. Bibigyan ko kayo ng strong pain reliever. Madaming tubig para lumabas. If malaki, kailangan lithotripsy or surgery.'"
+            },
+            {
+                word: "UTI (Urinary Tract Infection)",
+                tagalog: "Impeksyon sa Ihi",
+                category: "conditions",
+                scenario: "UTI symptoms: 'May UTI po kayo. Masakit pag umihi, madalas umihi, at feeling di naubos. May bacteria sa ihi. 7 days antibiotics. Maraming tubig. Wag pigilan ang ihi.'"
+            },
+            {
+                word: "Edema",
+                tagalog: "Pamamaga / Namamaga",
+                category: "conditions",
+                scenario: "Heart failure patient: 'Namamaga po ang paa ninyo, may edema. Sign po yan ng heart failure, hindi na kaya ng puso i-pump ang tubig. Diuretics para ilabas ang tubig. Low salt diet. Elevate legs.'"
+            },
+            {
+                word: "Ascites",
+                tagalog: "Tubig sa Tiyan",
+                category: "conditions",
+                scenario: "Liver cirrhosis: 'May ascites po kayo, tubig sa tiyan dahil sa liver problem. Kaya lumalaki ang tiyan. Kailangan paracentesis para sipsipin ang tubig. Diuretics din at low sodium diet.'"
+            },
+            {
+                word: "Pleural Effusion",
+                tagalog: "Tubig sa Baga",
+                category: "conditions",
+                scenario: "Chest X-ray result: 'May pleural effusion po kayo, tubig sa gilid ng baga. Kaya nahihirapan kayong huminga. Kailangan thoracentesis, tusukin para ilabas ang tubig. Tatanungin muna cause nito.'"
+            },
+            {
+                word: "Mechanical Ventilation",
+                tagalog: "Makina para Huminga",
+                category: "equipment",
+                scenario: "ICU family teaching: 'Naka-ventilator po siya, machine ang tumutulong huminga. May tubo sa lalamunan. Hindi siya makakasalita pero naririnig niya kayo. Kausapin ninyo siya.'"
+            },
+            {
+                word: "Tracheostomy Care",
+                tagalog: "Pag-aalaga ng Trach",
+                category: "procedures",
+                scenario: "Daily trach care: 'Linisin natin ang trach site ng hydrogen peroxide, tapos saline. Palitan ang inner cannula. Bago ang trach ties. Suction as needed. Bantayan kung may redness or infection.'"
+            },
+            {
+                word: "Chest Physiotherapy",
+                tagalog: "Therapy sa Dibdib",
+                category: "procedures",
+                scenario: "Pneumonia patient: 'Gagawin ko po chest physiotherapy sa inyo. Tatapik-tapikin ko ang likod ninyo para lumabas ang plema. After, mag-deep breathing exercises kayo. 4x a day po ito.'"
+            },
+            {
+                word: "Postural Drainage",
+                tagalog: "Pagpapatagas ng Plema",
+                category: "procedures",
+                scenario: "Secretion management: 'Iposisyon ko po kayo ng different angles para lumabas ang plema from different lung areas. Every position, 5-10 minutes. Tapos uubuhin ninyo. Para malinis ang baga.'"
+            },
+            {
+                word: "Nasogastric Feeding",
+                tagalog: "Pagpapakain sa NG Tube",
+                category: "procedures",
+                scenario: "Tube feeding time: 'Check ko muna kung nasa tamang position ang NG tube. Inject ng air, auscultate. Okay. Slowly ko ipapasok ang feeding formula. 30 degrees elevated ang head ninyo for 1 hour after.'"
+            },
+            {
+                word: "Total Parenteral Nutrition",
+                tagalog: "Pagkain sa Ugat / TPN",
+                category: "procedures",
+                scenario: "TPN patient: 'Hindi po kayo pwedeng kumain through bibig or tiyan. Kaya TPN, complete nutrition through IV sa central line. May vitamins, minerals, lahat na. 24 hours continuous po yan.'"
+            },
+            {
+                word: "Central Line",
+                tagalog: "Linya sa Malaking Ugat",
+                category: "equipment",
+                scenario: "Central line care: 'May central line po kayo sa leeg, naka-insert sa malaking ugat papunta sa puso. Para sa mga aggressive meds at TPN. Strict aseptic technique. Dressing change every week.'"
+            },
+            {
+                word: "PICC Line",
+                tagalog: "Tubo sa Braso Papunta sa Puso",
+                category: "equipment",
+                scenario: "Long-term access: 'Maglalagay kami ng PICC line sa braso ninyo. Tubo papunta sa malapit sa puso. Para sa long-term antibiotics. Pwede gamitin for months. Iwas multiple IV sticks.'"
+            },
+            {
+                word: "Arterial Line",
+                tagalog: "Tubo sa Arterya",
+                category: "equipment",
+                scenario: "ICU monitoring: 'May arterial line po siya sa wrist, directly sa artery. Continuous BP monitoring. Very accurate. Para sa critically ill patients. Strict monitoring, wag gagalawin ang kamay.'"
+            },
+            {
+                word: "Swan-Ganz Catheter",
+                tagalog: "Catheter sa Puso",
+                category: "equipment",
+                scenario: "Cardiac monitoring: 'May Swan-Ganz catheter po para sukatin ang pressures sa puso. Pinasok through neck vein papunta sa right heart. For hemodynamic monitoring. ICU use only.'"
+            },
+            {
+                word: "Chest Drainage System",
+                tagalog: "Sistema ng Drainage sa Dibdib",
+                category: "equipment",
+                scenario: "Post-thoracotomy: 'Yang chest tube drainage, 3-bottle system. First collects fluid, second is underwater seal, third is suction. Dapat may bubbles. Bantayan kung may air leak.'"
+            },
+            {
+                word: "Jackson-Pratt Drain",
+                tagalog: "JP Drain / Drainage",
+                category: "equipment",
+                scenario: "Post-mastectomy: 'Yang JP drain, naka-suction yan para lumabas ang excess fluid from surgical site. Empty pag half full, measure, record. Pag less than 30cc per day for 2 days, remove na.'"
+            },
+            {
+                word: "Hemovac Drain",
+                tagalog: "Hemovac / Drainage",
+                category: "equipment",
+                scenario: "Post-op drain: 'Hemovac drain po yan, similar sa JP drain. Collects blood and fluid from surgery. Compress the bulb para mag-create ng suction. Empty, measure, record output every shift.'"
+            },
+            {
+                word: "Wound Dehiscence",
+                tagalog: "Pagbukas ng Sugat",
+                category: "conditions",
+                scenario: "Post-op complication: 'Bumuksan po ang sugat ninyo, may wound dehiscence. Nakikita ang loob. Emergency po ito. Cover with sterile saline gauze. NPO kayo. Call surgeon stat for re-closure.'"
+            },
+            {
+                word: "Evisceration",
+                tagalog: "Paglabas ng Bituka",
+                category: "conditions",
+                scenario: "Surgical emergency: 'Lumabas po ang intestines sa sugat! Evisceration! Cover immediately with sterile saline-soaked gauze! NPO! Flat position! IV access! Call surgeon STAT! Emergency surgery now!'"
+            },
+            {
+                word: "Compartment Syndrome",
+                tagalog: "Paninigas ng Kalamnan",
+                category: "conditions",
+                scenario: "Post-fracture: 'Sobrang sakit ng braso ninyo kahit may pain meds, numb na, walang pulse. Possible compartment syndrome. Pressure sa muscles. Emergency fasciotomy needed. Call orthopedic surgeon now!'"
+            },
+            {
+                word: "Deep Vein Thrombosis",
+                tagalog: "Blood Clot sa Binti / DVT",
+                category: "conditions",
+                scenario: "DVT assessment: 'Namamaga at masakit ang binti ninyo, positive Homan sign. May DVT po, blood clot sa deep vein. Danger is pumunta sa baga. Bed rest. Anticoagulants. Elevate leg.'"
+            },
+            {
+                word: "Pulmonary Embolism",
+                tagalog: "Blood Clot sa Baga",
+                category: "conditions",
+                scenario: "PE emergency: 'Biglang nahirapan huminga, chest pain, rapid heartbeat. Possible pulmonary embolism! Blood clot from leg went to lungs! High-flow oxygen! IV access! CT angiogram! Heparin drip stat!'"
+            },
+            {
+                word: "Myocardial Infarction",
+                tagalog: "Heart Attack / Atake sa Puso",
+                category: "conditions",
+                scenario: "MI patient: 'Chest pain radiating to left arm, sweating, nauseous. Heart attack po ito. Chew aspirin now! Oxygen! 12-lead EKG! Troponin! Call cardiology! Time is muscle!'"
+            },
+            {
+                word: "Angina Pectoris",
+                tagalog: "Pananakit ng Dibdib",
+                category: "conditions",
+                scenario: "Stable angina: 'Sumasakit po ang dibdib ninyo pag nag-eexercise or stress, nawawala pag nagpahinga. Angina po yan. Nitroglycerin sublingual pag sumakit. If 3 doses walang ginhawa, ER agad.'"
+            },
+            {
+                word: "Congestive Heart Failure",
+                tagalog: "Pagbagsak ng Puso / CHF",
+                category: "conditions",
+                scenario: "CHF management: 'May heart failure po kayo. Symptoms: shortness of breath, swelling, fatigue. Low salt diet. Daily weights. Diuretics. Fluid restriction. Monitor intake-output. Report weight gain.'"
+            },
+            {
+                word: "Atrial Fibrillation",
+                tagalog: "Irregular na Tibok / AFib",
+                category: "conditions",
+                scenario: "AFib patient: 'Irregular po ang tibok ng puso ninyo, atrial fibrillation. Risk for blood clots. Kaya need ng blood thinner. Monitor pulse daily. Report palpitations, dizziness, chest pain.'"
+            },
+            {
+                word: "Arrhythmia",
+                tagalog: "Hindi Regular na Tibok",
+                category: "conditions",
+                scenario: "Cardiac monitoring: 'May arrhythmia po ang puso ninyo, hindi regular ang tibok. May different types. Kaya naka-cardiac monitor kayo continuously. Some are benign, some dangerous. Observe muna natin.'"
+            },
+            {
+                word: "Bradycardia",
+                tagalog: "Mabagal na Tibok",
+                category: "vitals",
+                scenario: "Slow heart rate: 'Mabagal po ang tibok ng puso ninyo, 45 beats per minute lang. Normal ay 60-100. Nahihilo ba kayo? May certain medications na nagdudulot nito. Monitor natin closely.'"
+            },
+            {
+                word: "Tachycardia",
+                tagalog: "Mabilis na Tibok",
+                category: "vitals",
+                scenario: "Fast heart rate: 'Mabilis po ang tibok ninyo, 130 per minute. Normal lang ay 60-100. May lagnat ba kayo? Anxious? Dehydrated? Kailangan natin i-address ang cause at normalize ang heart rate.'"
+            },
+            {
+                word: "Hypotension",
+                tagalog: "Mababang Presyon",
+                category: "vitals",
+                scenario: "Low BP: 'Mababa po ang presyon ninyo, 80/50. Normal ay 120/80. Nahihilo ba kayo pag tumayo? Possible causes: dehydration, blood loss, infection. IV fluids muna. Monitor every 15 minutes.'"
+            },
+            {
+                word: "Hypertensive Crisis",
+                tagalog: "Sobrang Taas ng Presyon",
+                category: "conditions",
+                scenario: "BP emergency: 'Sobrang taas po ng presyon ninyo, 220/120! Hypertensive emergency! May sakit ba ng ulo, blurred vision, chest pain? IV antihypertensive drip! ICU admission! Risk for stroke!'"
+            },
+            {
+                word: "Hypothermia",
+                tagalog: "Sobrang Lamig ng Katawan",
+                category: "conditions",
+                scenario: "Low temperature: 'Sobrang baba ng temperatura ninyo, 34 degrees. Hypothermia po yan. Warming blankets! Warm IV fluids! Monitor cardiac rhythm! Slowly warm, hindi dapat biglaan!'"
+            },
+            {
+                word: "Hyperthermia",
+                tagalog: "Sobrang Init ng Katawan",
+                category: "conditions",
+                scenario: "Heat stroke: 'Sobrang taas ng temperatura ninyo, 41 degrees! Hyperthermia! Cooling blanket now! Ice packs sa groin, neck, armpits! Cold IV fluids! Monitor neuro status!'"
+            },
+            {
+                word: "Hypoglycemia",
+                tagalog: "Mababang Asukal",
+                category: "conditions",
+                scenario: "Low blood sugar: 'Nanginginig kayo, sweating, confused. Blood sugar ninyo 40 only. Hypoglycemia! Drink juice now or eat candy. If unconscious, IV dextrose. Recheck after 15 minutes.'"
+            },
+            {
+                word: "Hyperglycemia",
+                tagalog: "Mataas na Asukal",
+                category: "conditions",
+                scenario: "High blood sugar: 'Blood sugar ninyo 400! Hyperglycemia. Nauuhaw, umihi ng marami, pagod. DKA risk. Insulin correction dose. Hydration. Monitor ketones. If worsens, ICU for DKA protocol.'"
+            },
+            {
+                word: "Diabetic Ketoacidosis",
+                tagalog: "DKA / Acidic ang Dugo",
+                category: "conditions",
+                scenario: "DKA crisis: 'May DKA po kayo. Blood sugar sobrang taas, may ketones, acidic ang dugo. Insulin drip! Aggressive hydration! Electrolyte replacement! Hourly glucose checks! ICU admission!'"
+            },
+            {
+                word: "Hypoxia",
+                tagalog: "Kulang sa Oxygen",
+                category: "conditions",
+                scenario: "Low oxygen: 'Oxygen saturation ninyo 85% only. Hypoxia po yan, kulang sa oxygen ang katawan. High-flow oxygen now! Monitor respiratory rate! Check for cyanosis! May labored breathing?'"
+            },
+            {
+                word: "Cyanosis",
+                tagalog: "Pag-asul / Namumutla",
+                category: "conditions",
+                scenario: "Blue discoloration: 'Nag-cyanosis po kayo, asul ang lips at fingernails. Sign of severe hypoxia. Kulang sa oxygen. Increase oxygen delivery! Check airway! May obstruction ba? Prepare for intubation!'"
+            },
+            {
+                word: "Dyspnea",
+                tagalog: "Hirap sa Paghinga",
+                category: "conditions",
+                scenario: "Shortness of breath: 'Nahihirapan po kayong huminga? Dyspnea. Umupo po kayo ng upright. Oxygen! Check lung sounds. Chest X-ray. Could be pneumonia, heart failure, or pulmonary embolism.'"
+            },
+            {
+                word: "Orthopnea",
+                tagalog: "Hindi Makahinga Pag Nakahiga",
+                category: "conditions",
+                scenario: "Heart failure sign: 'Hindi po kayo makahinga pag nakahiga, kailangan umupo? Orthopnea po yan. Sign of heart failure. Kaya need ninyo matulog ng elevated. Use pillows or raise head of bed.'"
+            },
+            {
+                word: "Paroxysmal Nocturnal Dyspnea",
+                tagalog: "Biglang Hirap Huminga sa Gabi",
+                category: "conditions",
+                scenario: "PND episode: 'Nagising po kayo sa gabi feeling suffocated? PND po yan, sign ng heart failure. Fluid sa baga pag nakahiga. Diuretics before sleep. Sleep with elevated head.'"
+            },
+            {
+                word: "Rales/Crackles",
+                tagalog: "Kaluskos sa Baga",
+                category: "conditions",
+                scenario: "Lung assessment: 'May rales po ako naririnig sa baga ninyo, parang kaluskos. Sign ng fluid sa lungs. Could be pneumonia or pulmonary edema. Chest X-ray, oxygen, antibiotics kung may infection.'"
+            },
+            {
+                word: "Wheezing",
+                tagalog: "Parang Sipol ang Hininga",
+                category: "conditions",
+                scenario: "Asthma exacerbation: 'May wheezing po kayo, parang sipol ang tunog pag huminga. Narrowed ang airways. Asthma attack or bronchospasm. Nebulizer treatment! Bronchodilators! Assess response!'"
+            },
+            {
+                word: "Stridor",
+                tagalog: "Mataas na Tunog sa Hininga",
+                category: "conditions",
+                scenario: "Airway emergency: 'May stridor po, high-pitched sound sa hininga. Upper airway obstruction! Emergency! Upright position! Oxygen! Notify doctor! May need intubation! Prepare emergency airway equipment!'"
+            },
+            {
+                word: "Hemoptysis",
+                tagalog: "Pag-ubo ng Dugo",
+                category: "conditions",
+                scenario: "Coughing blood: 'Umuubo po kayo ng dugo? Hemoptysis. Gaano kadami? Malaki ba? TB, pneumonia, or cancer possible. Chest X-ray urgently. Monitor vital signs. Assess airway.'"
+            },
+            {
+                word: "Hematemesis",
+                tagalog: "Pagsusuka ng Dugo",
+                category: "conditions",
+                scenario: "GI bleeding: 'Nagsusuka po kayo ng dugo? Hematemesis. Gaano kadami? Coffee-ground ba or bright red? GI bleeding. NPO! Large bore IV! Type and cross match! Prepare for endoscopy!'"
+            },
+            {
+                word: "Melena",
+                tagalog: "Maitim na Tae",
+                category: "conditions",
+                scenario: "Black stool: 'Maitim po ang tae ninyo? Melena. Sign ng upper GI bleeding. Blood nadidigest kaya black. Monitor BP. CBC. Stool occult blood test. Possible endoscopy.'"
+            },
+            {
+                word: "Hematochezia",
+                tagalog: "Dumugong Tae",
+                category: "conditions",
+                scenario: "Bright red blood: 'May bright red blood po sa tae ninyo? Hematochezia. Lower GI bleeding. Gaano kadami? Hemorrhoids lang ba or serious? Monitor vital signs. CBC. Colonoscopy if heavy.'"
+            },
+            {
+                word: "Hematuria",
+                tagalog: "Dugo sa Ihi",
+                category: "conditions",
+                scenario: "Blood in urine: 'May dugo po sa ihi ninyo? Hematuria. Kidney stones, UTI, or bladder problem possible. Urinalysis. Ultrasound. Painful ba pag umihi? Monitor color ng urine.'"
+            },
+            {
+                word: "Oliguria",
+                tagalog: "Kaunti ang Ihi",
+                category: "conditions",
+                scenario: "Low urine output: 'Kaunti lang po ang ihi ninyo, less than 400ml per day. Oliguria. Sign ng kidney problem or dehydration. Monitor intake-output strictly. IV fluids. Check kidney function.'"
+            },
+            {
+                word: "Anuria",
+                tagalog: "Walang Ihi",
+                category: "conditions",
+                scenario: "No urine output: 'Wala po kayong ihi for 12 hours? Anuria. Emergency! Kidney failure or blockage. Foley catheter check if patent. Renal ultrasound. Nephrologist consult. Possible dialysis.'"
+            },
+            {
+                word: "Polyuria",
+                tagalog: "Sobrang Dami ng Ihi",
+                category: "conditions",
+                scenario: "Excessive urination: 'Sobrang dami po ng ihi ninyo? Polyuria. Could be diabetes, diabetes insipidus, or diuretic effect. Check blood sugar. Electrolytes. Monitor for dehydration.'"
+            },
+            {
+                word: "Dysuria",
+                tagalog: "Masakit ang Pag-ihi",
+                category: "conditions",
+                scenario: "Painful urination: 'Masakit po pag umihi kayo? Dysuria. Usually UTI. Urinalysis to confirm bacteria. Antibiotics. Maraming tubig. Cranberry juice helps. Avoid holding urine.'"
+            },
+            {
+                word: "Nocturia",
+                tagalog: "Pag-ihi sa Gabi",
+                category: "conditions",
+                scenario: "Nighttime urination: 'Gising po kayo ng maraming beses sa gabi para umihi? Nocturia. Could be prostate problem, heart failure, or diabetes. Limit fluids before bed. Void before sleeping.'"
+            },
+            {
+                word: "Incontinence",
+                tagalog: "Hindi Mapigilan ang Ihi",
+                category: "conditions",
+                scenario: "Urinary incontinence: 'Hindi po ninyo mapigilan ang ihi? Incontinence. Different types. Kegel exercises. Bladder training. Adult diapers temporarily. Possible medication. Urologist referral if severe.'"
+            },
+            {
+                word: "Retention",
+                tagalog: "Hindi Makalabas ang Ihi",
+                category: "conditions",
+                scenario: "Urinary retention: 'Naihi po ba kayo? Puno na ba ang bladder pero di lumabas? Urinary retention. Foley catheter insertion to drain. Check prostate sa lalaki. Post-op common ito.'"
+            },
+            {
+                word: "Jaundice",
+                tagalog: "Paninilaw / Jaundice",
+                category: "conditions",
+                scenario: "Yellow skin: 'Nanilaw po ang balat at mata ninyo? Jaundice. Liver or bile problem. Hepatitis, cirrhosis, or gallstones possible. Liver function tests. Bilirubin check. Ultrasound.'"
+            },
+            {
+                word: "Cirrhosis",
+                tagalog: "Pagsama ng Atay",
+                category: "conditions",
+                scenario: "Liver disease: 'May cirrhosis po kayo, scarring ng liver. End-stage liver disease. Iwasan alak completely. Low protein diet. Monitor for ascites, bleeding, confusion. Possible liver transplant.'"
+            },
+            {
+                word: "Hepatic Encephalopathy",
+                tagalog: "Nalilito dahil sa Atay",
+                category: "conditions",
+                scenario: "Confused patient: 'Nalilito po kayo, may hepatic encephalopathy. Toxins from liver going to brain. Lactulose to clean bowels. Low protein. Confused po siya, bantayan. May asterixis.'"
+            },
+            {
+                word: "Pancreatitis",
+                tagalog: "Namamagang Pancreas",
+                category: "conditions",
+                scenario: "Severe abdominal pain: 'Sobrang sakit ng upper abdomen radiating sa likod? Pancreatitis. NPO muna kayo. NG tube. IV fluids. Pain management. Amylase, lipase elevated. Avoid alcohol.'"
+            },
+            {
+                word: "Peritonitis",
+                tagalog: "Impeksyon sa Tiyan",
+                category: "conditions",
+                scenario: "Abdominal emergency: 'Rigid ang tiyan ninyo, sobrang sakit pag pinipindot. Peritonitis. Infection sa abdominal cavity. Emergency surgery likely. Broad spectrum antibiotics. NPO. Large bore IV.'"
+            },
+            {
+                word: "Ileus",
+                tagalog: "Hindi Gumagalaw ang Bituka",
+                category: "conditions",
+                scenario: "Bowel obstruction: 'Walang bowel sounds, namamaga ang tiyan, hindi nakakatae. Ileus, hindi gumagalaw ang intestines. NPO. NG tube to suction. IV fluids. Monitor for return of bowel sounds.'"
+            },
+            {
+                word: "Constipation",
+                tagalog: "Tibi / Constipated",
+                category: "conditions",
+                scenario: "No bowel movement: 'Ilang araw na po kayong hindi nakakatae? Constipation. Increase fiber, fluids, exercise. Laxative or suppository. Prevent impaction. Daily routine importante.'"
+            },
+            {
+                word: "Diarrhea",
+                tagalog: "Pagtatae / LBM",
+                category: "conditions",
+                scenario: "Loose stools: 'Tumatae po kayo ng maraming beses, loose? Diarrhea. Dehydration risk. Oresol or IV fluids. Monitor stool frequency, consistency. Stool exam if persistent. Hand hygiene.'"
+            },
+            {
+                word: "Gastroenteritis",
+                tagalog: "Viral / Pag-aanak ng Tiyan",
+                category: "conditions",
+                scenario: "Stomach flu: 'May gastroenteritis po kayo, viral infection. Vomiting, diarrhea, cramps. Rest, hydration, bland diet. Anti-emetics. Usually resolves in 3-5 days. Isolate para di kumalat.'"
+            },
+            {
+                word: "GERD (Gastroesophageal Reflux)",
+                tagalog: "Acid Reflux / Timpla",
+                category: "conditions",
+                scenario: "Heartburn: 'Sumasamang paakyat sa lalamunan ang acid? GERD po yan. Avoid spicy, fatty foods. Elevate head when sleeping. Don't eat before bed. Antacids or PPI medication.'"
+            },
+            {
+                word: "Peptic Ulcer",
+                tagalog: "Ulser / Sugat sa Tiyan",
+                category: "conditions",
+                scenario: "Stomach ulcer: 'May ulcer po kayo sa tiyan, parang sugat sa loob. Kaya sumasakit especially pag gutom. H. pylori possible. Antibiotics, PPI. Avoid NSAIDs, coffee, alcohol.'"
+            },
+            {
+                word: "Gastritis",
+                tagalog: "Gastritis / Namamagang Tiyan",
+                category: "conditions",
+                scenario: "Stomach inflammation: 'May gastritis po kayo, inflamed ang lining ng stomach. Sumasakit after eating. Avoid spicy, acidic foods. Small frequent meals. Antacids. Reduce stress.'"
+            },
+            {
+                word: "Hemorrhoids",
+                tagalog: "Almoranas",
+                category: "conditions",
+                scenario: "Rectal bleeding: 'May almoranas po kayo, swollen veins sa anus. Kaya may dugo sa tae at masakit. Sitz bath. High fiber diet. Stool softeners. Avoid straining. Surgery if severe.'"
+            },
+            {
+                word: "Osteoporosis",
+                tagalog: "Manipis na Buto",
+                category: "conditions",
+                scenario: "Bone density: 'May osteoporosis po kayo, manipis at brittle na ang buto. High risk for fractures. Calcium, vitamin D supplements. Weight-bearing exercise. Avoid falls. Bone density scan yearly.'"
+            },
+            {
+                word: "Arthritis",
+                tagalog: "Rayuma / Arthritis",
+                category: "conditions",
+                scenario: "Joint pain: 'May arthritis po kayo, inflamed ang joints. Masakit, namamaga, mahirap gumalaw. Rheumatoid or osteoarthritis. Pain relievers. Physical therapy. Hot/cold compress. Joint protection.'"
+            },
+            {
+                word: "Gout",
+                tagalog: "Gout / Sakit ng Uric Acid",
+                category: "conditions",
+                scenario: "Joint inflammation: 'Sobrang sakit ng big toe, namumula, namamaga? Gout po yan. Uric acid crystals sa joint. Allopurinol. Avoid high purine foods like liver, seafood, beer. Maraming tubig.'"
+            },
+            {
+                word: "Cellulitis",
+                tagalog: "Impeksyon sa Balat",
+                category: "conditions",
+                scenario: "Skin infection: 'Namumula, namamaga, mainit ang binti ninyo. Cellulitis, bacterial skin infection. IV or oral antibiotics. Elevate. Mark the border, monitor if spreading. Possible admission.'"
+            },
+            {
+                word: "Abscess",
+                tagalog: "Pigsa / Abscess",
+                category: "conditions",
+                scenario: "Skin abscess: 'May bukol po na may nana sa loob? Abscess. Kailangan incision and drainage. Antibiotics. Warm compress. Don't squeeze. Pagaling dressing changes. May culture pa.'"
+            },
+            {
+                word: "Dermatitis",
+                tagalog: "Pantal / Dermatitis",
+                category: "conditions",
+                scenario: "Skin rash: 'May pantal po kayo, dermatitis. Makati, namumula. Allergic reaction possible. Antihistamine. Steroid cream. Avoid irritants. Don't scratch. Keep skin moisturized.'"
+            },
+            {
+                word: "Psoriasis",
+                tagalog: "Psoriasis / Balat na Balakubak",
+                category: "conditions",
+                scenario: "Chronic skin condition: 'May psoriasis po kayo, chronic skin disease. Scaly, red patches. Hindi nakakahawa. Steroid creams. Moisturizers. UV therapy. Stress management. Lifelong condition.'"
+            },
+            {
+                word: "Eczema",
+                tagalog: "Eczema / Galis",
+                category: "conditions",
+                scenario: "Itchy skin: 'May eczema po kayo, chronic itchy skin condition. Keep moisturized. Avoid triggers. Steroid cream pag flare-up. Don't scratch. Moisturize after bathing.'"
+            },
+            {
+                word: "Scabies",
+                tagalog: "Galis / Scabies",
+                category: "conditions",
+                scenario: "Contagious rash: 'May scabies po kayo, mite infection. Nakakahawa. Itchy especially sa gabi. Permethrin cream all over body. Wash all clothes, beddings in hot water. Treat family members.'"
+            },
+            {
+                word: "Herpes Zoster",
+                tagalog: "Kulebra / Shingles",
+                category: "conditions",
+                scenario: "Painful rash: 'May herpes zoster or shingles po kayo. Reactivation ng chickenpox virus. Painful blisters sa isang side. Antiviral within 72 hours. Pain management. Contagious sa walang chickenpox.'"
+            },
+            {
+                word: "Varicella",
+                tagalog: "Bulutong / Chickenpox",
+                category: "conditions",
+                scenario: "Chickenpox: 'May bulutong po kayo, chickenpox. Itchy blisters all over. Isolate 1 week. Calamine lotion. Antihistamine. Avoid scratching. Trim nails. May vaccine na pala for prevention.'"
+            },
+            {
+                word: "Measles",
+                tagalog: "Tigdas",
+                category: "conditions",
+                scenario: "Measles diagnosis: 'May tigdas po kayo, measles. Lagnat, rash, red eyes. Highly contagious through airborne. Isolate. Supportive care. Vitamin A. Report to health department. Vaccine-preventable.'"
+            },
+            {
+                word: "Mumps",
+                tagalog: "Beke / Mumps",
+                category: "conditions",
+                scenario: "Swollen salivary glands: 'Namamaga ang glands sa ilalim ng tenga ninyo? Mumps or beke. Viral infection. Soft diet. Pain relievers. Isolate. Usually resolves in 1-2 weeks. Vaccine-preventable.'"
+            },
+            {
+                word: "Dengue Fever",
+                tagalog: "Dengue",
+                category: "conditions",
+                scenario: "Dengue patient: 'May dengue po kayo. High fever, body pain, rash. Monitor platelets daily. Hydration importante. Admit if warning signs: bleeding, persistent vomiting, severe pain. No aspirin.'"
+            },
+            {
+                word: "Malaria",
+                tagalog: "Malaria",
+                category: "conditions",
+                scenario: "Malaria diagnosis: 'Positive po ang blood smear for malaria. Lagnat na on-off, chills. Anti-malarial medication. Monitor. Mosquito bite from endemic area. Report travel history.'"
+            },
+            {
+                word: "Typhoid Fever",
+                tagalog: "Typhoid",
+                category: "conditions",
+                scenario: "Typhoid patient: 'May typhoid po kayo. Prolonged fever, abdominal pain. Salmonella bacteria from contaminated food/water. Antibiotics for 2 weeks. Hydration. Blood culture. Isolation.'"
+            },
+            {
+                word: "Leptospirosis",
+                tagalog: "Leptospirosis / Tigdas-Dagta",
+                category: "conditions",
+                scenario: "Post-flood illness: 'Nalakad ba kayo sa baha? May leptospirosis po kayo. From rat urine. Lagnat, muscle pain, jaundice. Antibiotics aggressively. Liver, kidney monitoring. Can be fatal if delayed.'"
+            },
+            {
+                word: "Rabies",
+                tagalog: "Rabies / Sakit ng Aso",
+                category: "conditions",
+                scenario: "Dog bite: 'Kinagat po kayo ng aso? Wash wound immediately with soap and water for 15 minutes. Rabies vaccine series. Anti-rabies immunoglobulin. Observe dog for 10 days. Fatal pag may symptoms na.'"
+            },
+            {
+                word: "Tetanus",
+                tagalog: "Tetanus",
+                category: "conditions",
+                scenario: "Wound care: 'Rusty nail ba kinalagan ninyo? Risk for tetanus. Tetanus toxoid booster shot. Clean wound properly. Stiff jaw, muscle spasms ang symptoms. Vaccine prevents this.'"
+            },
+            {
+                word: "Meningococcemia",
+                tagalog: "Meningococcemia",
+                category: "conditions",
+                scenario: "Bacterial infection: 'May petechiae, mataas na lagnat, stiff neck. Possible meningococcemia. Emergency! Blood culture. Lumbar puncture. IV antibiotics immediately. Droplet precautions. Notify contacts.'"
+            },
+            {
+                word: "Encephalitis",
+                tagalog: "Namamagang Utak",
+                category: "conditions",
+                scenario: "Brain inflammation: 'May encephalitis po, inflamed ang brain. Lagnat, headache, altered consciousness. Possible viral or bacterial. Lumbar puncture. Antivirals or antibiotics. ICU monitoring. Serious condition.'"
+            },
+            {
+                word: "Seizure",
+                tagalog: "Atake / Seizure",
+                category: "conditions",
+                scenario: "Seizure response: 'Nag-seizure ang pasyente! Side position! Protect head! Don't restrain! Don't insert anything sa mouth! Time the seizure! Suction ready! Oxygen! Post-ictal state, confused siya after.'"
+            },
+            {
+                word: "Epilepsy",
+                tagalog: "Epilepsy / May Atake",
+                category: "conditions",
+                scenario: "Chronic seizures: 'May epilepsy po kayo, recurrent seizures. Anti-seizure medication daily. Avoid triggers: lack of sleep, alcohol, flashing lights. Wear medical alert. Inform family emergency plan.'"
+            },
+            {
+                word: "Parkinson Disease",
+                tagalog: "Parkinson / Nanginginig",
+                category: "conditions",
+                scenario: "Neurological disorder: 'May Parkinson po kayo. Tremors, rigid muscles, slow movement. Medications help symptoms. Physical therapy. Prevent falls. Progressive disease. Support groups available.'"
+            },
+            {
+                word: "Alzheimer Disease",
+                tagalog: "Alzheimer / Nalilimutan",
+                category: "conditions",
+                scenario: "Dementia: 'May Alzheimer disease po lolo ninyo. Progressive memory loss. Wandering. Behavior changes. No cure yet. Medications slow progression. Safety measures sa bahay. Caregiver support importante.'"
+            },
+            {
+                word: "Multiple Sclerosis",
+                tagalog: "Multiple Sclerosis / MS",
+                category: "conditions",
+                scenario: "MS diagnosis: 'May MS po kayo, autoimmune disease affecting nerves. Symptoms: weakness, numbness, vision problems. Flare-ups and remissions. Disease-modifying drugs. Physical therapy. Manage symptoms.'"
+            },
+            {
+                word: "Guillain-Barre Syndrome",
+                tagalog: "GBS / Paralisis",
+                category: "conditions",
+                scenario: "Ascending paralysis: 'May GBS po kayo. Paralysis from legs going up. Can affect breathing. Plasmapheresis or IVIG treatment. Ventilator standby. Recovery takes months. Physical therapy crucial.'"
+            },
+            {
+                word: "Bell Palsy",
+                tagalog: "Pangangalig ng Mukha",
+                category: "conditions",
+                scenario: "Facial paralysis: 'May Bell palsy po kayo. Half ng face paralyzed. Eye protection importante, eye patch. Steroids. Physical therapy. Usually recovers in 3-6 months. Protect eye from drying.'"
+            },
+            {
+                word: "Trigeminal Neuralgia",
+                tagalog: "Sakit ng Mukha",
+                category: "conditions",
+                scenario: "Facial pain: 'Sobrang sakit ng mukha ninyo like electric shock? Trigeminal neuralgia. Severe facial nerve pain. Medications like carbamazepine. Avoid triggers. Surgery option if medications fail.'"
+            },
+            {
+                word: "Migraine",
+                tagalog: "Migraine / Matinding Sakit ng Ulo",
+                category: "conditions",
+                scenario: "Severe headache: 'May migraine po kayo. One-sided headache, throbbing, nausea, photophobia. Dark quiet room. Pain relievers early. Ice pack. Avoid triggers: stress, certain foods, lack of sleep.'"
+            },
+            {
+                word: "Tension Headache",
+                tagalog: "Sakit ng Ulo dahil sa Tensyon",
+                category: "conditions",
+                scenario: "Common headache: 'Tension headache po yan. Feeling tight band around head. Stress-related. Pain relievers. Massage. Relaxation. Rest. Heat pack sa neck. Reduce stress triggers.'"
+            },
+            {
+                word: "Vertigo",
+                tagalog: "Pagkahilo / Ikot",
+                category: "conditions",
+                scenario: "Dizziness: 'May vertigo po kayo, feeling umiikot ang paligid. Possible inner ear problem. Antivert medication. Epley maneuver. Avoid sudden head movements. Fall precautions. ENT referral.'"
+            },
+            {
+                word: "Tinnitus",
+                tagalog: "Tunog sa Tainga",
+                category: "conditions",
+                scenario: "Ear ringing: 'May tunog po kayo naririnig sa tainga na walang actual sound? Tinnitus. Can be from ear problem, medications, or nerve. ENT check. Sometimes permanent. Masking sounds help.'"
+            },
+            {
+                word: "Cataract",
+                tagalog: "Katarata / Malabo ang Mata",
+                category: "conditions",
+                scenario: "Vision problem: 'May cataract po kayo, cloudy na ang lens ng mata. Progressive. Surgery para tanggalin at replace with artificial lens. Common sa elderly. Usually successful procedure.'"
+            },
+            {
+                word: "Glaucoma",
+                tagalog: "Glaucoma / Mataas na Presyon ng Mata",
+                category: "conditions",
+                scenario: "Eye pressure: 'May glaucoma po kayo, mataas ang pressure sa mata. Can cause blindness. Eye drops daily to lower pressure. Regular eye check. Don't miss medications. Optha follow-up.'"
+            },
+            {
+                word: "Retinopathy",
+                tagalog: "Sira sa Retina",
+                category: "conditions",
+                scenario: "Diabetic complication: 'May diabetic retinopathy po kayo, damaged na ang blood vessels sa mata. Can lead to blindness. Control blood sugar strictly. Laser treatment. Regular eye exams. Early detection importante.'"
+            },
+            {
+                word: "Conjunctivitis",
+                tagalog: "Sore Eyes",
+                category: "conditions",
+                scenario: "Pink eye: 'May conjunctivitis or sore eyes po kayo. Namumula, may lagkit. Viral or bacterial. Antibiotic drops if bacterial. Highly contagious. Separate towel. Frequent hand washing. Don't rub eyes.'"
+            },
+            {
+                word: "Otitis Media",
+                tagalog: "Impeksyon sa Tainga",
+                category: "conditions",
+                scenario: "Ear infection: 'May otitis media po ang bata, ear infection. Masakit, may lagnat. Antibiotics. Pain relievers. Warm compress. Follow-up after 3 days. Chronic can affect hearing.'"
+            },
+            {
+                word: "Sinusitis",
+                tagalog: "Baradong Ilong / Sinus Infection",
+                category: "conditions",
+                scenario: "Sinus infection: 'May sinusitis po kayo, inflamed ang sinuses. Facial pain, nasal congestion, headache. Antibiotics. Decongestants. Steam inhalation. Saline nasal spray. May take 2 weeks.'"
+            },
+            {
+                word: "Tonsillitis",
+                tagalog: "Namamagang Tonsil",
+                category: "conditions",
+                scenario: "Sore throat: 'May tonsillitis po kayo, infected ang tonsils. Masakit lunukin, may lagnat. Antibiotics. Gargles with warm salt water. Soft diet. If recurrent, possible tonsillectomy.'"
+            },
+            {
+                word: "Pharyngitis",
+                tagalog: "Namamagang Lalamunan",
+                category: "conditions",
+                scenario: "Throat infection: 'May pharyngitis po kayo, inflamed ang throat. Viral usually. Symptomatic treatment. Rest, fluids, lozenges. Antibiotics if bacterial. Throat culture if needed.'"
+            },
+            {
+                word: "Laryngitis",
+                tagalog: "Nawawala ang Boses",
+                category: "conditions",
+                scenario: "Voice loss: 'May laryngitis po kayo, inflamed ang voice box. Nawala or paos ang boses. Voice rest. Fluids. Avoid whispering. Steam inhalation. Usually viral, resolves in 1-2 weeks.'"
+            },
+            {
+                word: "Epistaxis",
+                tagalog: "Dumudugo ang Ilong",
+                category: "conditions",
+                scenario: "Nosebleed: 'Dumudugo po ang ilong ninyo? Epistaxis. Lean forward, pinch nose for 10 minutes. Ice sa bridge. Don't tilt head back. If heavy or won't stop, ER. May need cautery.'"
+            },
+            {
+                word: "Rhinitis",
+                tagalog: "Sipon / Allergic Rhinitis",
+                category: "conditions",
+                scenario: "Runny nose: 'May allergic rhinitis po kayo, chronic sipon. Triggered by allergens. Antihistamines. Nasal steroids. Avoid triggers. May allergy testing. Immunotherapy option.'"
+            },
+            {
+                word: "Bronchitis",
+                tagalog: "Ubo na may Plema",
+                category: "conditions",
+                scenario: "Cough with phlegm: 'May bronchitis po kayo, inflamed ang airways. Ubo with plema, lagnat. Usually viral. Rest, fluids, cough suppressant. Antibiotics if bacterial. Inhaler if wheezing.'"
+            },
+            {
+                word: "Emphysema",
+                tagalog: "Sira na ang Baga",
+                category: "conditions",
+                scenario: "COPD: 'May emphysema po kayo, damaged na ang air sacs ng lungs. From smoking usually. Shortness of breath. Inhalers. Oxygen. Pulmonary rehab. Stop smoking. Progressive disease.'"
+            },
+            {
+                word: "Chronic Obstructive Pulmonary Disease",
+                tagalog: "COPD / Chronic na Sakit sa Baga",
+                category: "conditions",
+                scenario: "COPD management: 'May COPD po kayo, chronic lung disease. Difficulty breathing, chronic cough. Inhalers daily. Quit smoking. Pulmonary rehabilitation. Oxygen if needed. Flu vaccine yearly.'"
+            },
+            {
+                word: "Pulmonary Tuberculosis",
+                tagalog: "TB sa Baga",
+                category: "conditions",
+                scenario: "Active TB: 'May pulmonary TB po kayo. Cough for 2 weeks, night sweats, weight loss. Airborne precautions. 6 months treatment. Directly observed therapy. Not contagious after 2 weeks of meds.'"
+            },
+            {
+                word: "Pleural Effusion Drainage",
+                tagalog: "Pagsipsip ng Tubig sa Baga",
+                category: "procedures",
+                scenario: "Thoracentesis: 'Gagawin ko po thoracentesis, tusukin ang likod para sipsipin ang tubig sa baga. Local anesthesia. Sitting position. Don't move. May sample for lab. Gumaan ang paghinga after.'"
+            },
+            {
+                word: "Bronchoscopy",
+                tagalog: "Camera sa Baga",
+                category: "procedures",
+                scenario: "Lung procedure: 'Mag-bronchoscopy po kayo, camera papasok sa lungs through throat. NPO 6 hours before. Sedation. Check for masses or bleeding. Throat sore after. Don't eat 2 hours after.'"
+            },
+            {
+                word: "Pacemaker",
+                tagalog: "Pacemaker / Battery ng Puso",
+                category: "equipment",
+                scenario: "Cardiac device: 'May pacemaker po kayo, device na tumutulong sa irregular heartbeat. Implanted under skin. Avoid magnets, MRI. Carry ID card. Check pacemaker clinic regularly. Battery lasts years.'"
+            },
+            {
+                word: "Defibrillator (ICD)",
+                tagalog: "Defibrillator na Nakakabit",
+                category: "equipment",
+                scenario: "Implanted device: 'May ICD po kayo, automatic defibrillator inside body. Shocks heart pag may deadly rhythm. May feel electric shock pag nag-fire. Report episodes. Avoid magnets, MRI.'"
+            },
+            {
+                word: "Cardiac Catheterization",
+                tagalog: "Pag-check ng Ugat ng Puso",
+                category: "procedures",
+                scenario: "Heart procedure: 'Mag-cardiac cath po kayo. Ipapasok ang catheter sa groin or wrist papunta sa heart arteries. Check for blockages. Possible angioplasty with stent. Bed rest 6 hours after.'"
+            },
+            {
+                word: "Angioplasty",
+                tagalog: "Pagbukas ng Baradong Ugat",
+                category: "procedures",
+                scenario: "Opening arteries: 'Ginawa po angioplasty sa inyo, binuksan ang blocked artery with balloon. Nilagyan ng stent. Dual antiplatelet for 1 year. Lifelong aspirin. Lifestyle changes importante.'"
+            },
+            {
+                word: "Coronary Artery Bypass Graft",
+                tagalog: "Bypass Surgery / CABG",
+                category: "procedures",
+                scenario: "Heart surgery: 'May CABG surgery po kayo, bypass ng blocked arteries using vein from leg. Open heart surgery. Recovery 6-8 weeks. Cardiac rehab. Medications lifelong. Lifestyle changes.'"
+            },
+            {
+                word: "Valve Replacement",
+                tagalog: "Palit ng Balbula ng Puso",
+                category: "procedures",
+                scenario: "Valve surgery: 'Pinalitan po ang heart valve ninyo, mechanical or tissue valve. Lifelong anticoagulation if mechanical. Regular echo. Antibiotic prophylaxis for dental procedures. Monitor INR.'"
+            },
+            {
+                word: "Echocardiogram",
+                tagalog: "Ultrasound ng Puso",
+                category: "procedures",
+                scenario: "Heart ultrasound: 'Mag-echo po kayo, ultrasound ng heart. Gel sa dibdib, probe para tingnan ang heart chambers, valves, function. Non-invasive. 30 minutes. Check for structural problems.'"
+            },
+            {
+                word: "Stress Test",
+                tagalog: "Exercise Test / Treadmill Test",
+                category: "procedures",
+                scenario: "Cardiac test: 'Mag-stress test po kayo, exercise sa treadmill while monitoring heart. Tumataas gradually ang speed. Check heart under stress. Stop if chest pain, dizziness. NPO 3 hours before.'"
+            },
+            {
+                word: "Holter Monitor",
+                tagalog: "Portable EKG",
+                category: "equipment",
+                scenario: "24-hour monitoring: 'Isusuot ninyo itong Holter monitor for 24-48 hours. Portable EKG. Records heart rhythm continuously. Keep diary of symptoms. Don't remove. Return after. Para check arrhythmias.'"
+            },
+            {
+                word: "Thrombolytic Therapy",
+                tagalog: "Gamot Pantunaw ng Blood Clot",
+                category: "meds",
+                scenario: "Clot buster: 'Bibigyan ko kayo ng thrombolytic, clot buster medication. For stroke or heart attack. Given within hours of onset. Bleeding risk. Monitor closely. No IM injections after.'"
+            },
+            {
+                word: "Anticoagulant",
+                tagalog: "Gamot Pampamanipis ng Dugo",
+                category: "meds",
+                scenario: "Blood thinner: 'Iniinom po ninyo ang anticoagulant or blood thinner. Para prevent blood clots. Regular INR monitoring. Avoid injury. Use soft toothbrush. Report bleeding. Consistent diet.'"
+            },
+            {
+                word: "Antiplatelet",
+                tagalog: "Gamot Kontra sa Platelet",
+                category: "meds",
+                scenario: "Aspirin therapy: 'Aspirin po yan, antiplatelet. Prevents platelets from clumping. For heart attack prevention. Take with food. Report unusual bleeding or bruising. Don't stop without doctor approval.'"
+            },
+            {
+                word: "Beta Blocker",
+                tagalog: "Gamot Pampabagal ng Tibok",
+                category: "meds",
+                scenario: "Heart medication: 'Beta blocker po yan, slows heart rate, lowers BP. For hypertension or heart failure. Take same time daily. Check pulse before taking. Report dizziness, fatigue. Don't stop abruptly.'"
+            },
+            {
+                word: "ACE Inhibitor",
+                tagalog: "Gamot sa Presyon at Puso",
+                category: "meds",
+                scenario: "BP medication: 'ACE inhibitor po yan, for BP and heart failure. May dry cough side effect. Monitor BP. Check kidney function. Don't use if pregnant. Report swelling of face.'"
+            },
+            {
+                word: "Diuretic",
+                tagalog: "Pampa-ihi / Water Pill",
+                category: "meds",
+                scenario: "Fluid management: 'Diuretic po yan, water pill. Palalabasin ang excess fluid. Take morning para di gising kayo mag-ihi sa gabi. Monitor weight daily. Check potassium levels. Report dizziness.'"
+            },
+            {
+                word: "Statin",
+                tagalog: "Gamot sa Cholesterol",
+                category: "meds",
+                scenario: "Cholesterol medication: 'Statin po yan, lowers cholesterol. Prevents heart disease. Take at night. Monitor liver function. Report muscle pain. Continue diet and exercise. Lifelong medication usually.'"
+            },
+            {
+                word: "Nitrate",
+                tagalog: "Gamot sa Angin / Nitroglycerin",
+                category: "meds",
+                scenario: "Angina relief: 'Nitroglycerin po yan, sublingual pag chest pain. Under tongue, dissolve. May burn sensation. Sit down, may cause dizziness. If 3 doses no relief, call ambulance.'"
+            },
+            {
+                word: "Bronchodilator",
+                tagalog: "Gamot Pampaluwag ng Hininga",
+                category: "meds",
+                scenario: "Asthma inhaler: 'Bronchodilator po yan, opens airways. Inhaler for asthma or COPD. Shake, breathe out, inhale deeply while pressing. Hold 10 seconds. Rinse mouth after steroid inhaler.'"
+            },
+            {
+                word: "Corticosteroid",
+                tagalog: "Steroid / Anti-inflammatory",
+                category: "meds",
+                scenario: "Steroid medication: 'Corticosteroid po yan, strong anti-inflammatory. For asthma, allergies, autoimmune. Take with food. Don't stop abruptly. Side effects: weight gain, high sugar, weak bones. Short-term use preferred.'"
+            },
+            {
+                word: "Proton Pump Inhibitor",
+                tagalog: "Gamot sa Acid / PPI",
+                category: "meds",
+                scenario: "Acid reducer: 'PPI po yan, potent acid reducer. For GERD, ulcers. Take before breakfast. 30 minutes before meal. Long-term use may affect calcium absorption. Effective but may need months.'"
+            },
+            {
+                word: "H2 Blocker",
+                tagalog: "Acid Blocker",
+                category: "meds",
+                scenario: "Stomach medication: 'H2 blocker po yan, reduces stomach acid. For heartburn, ulcers. Can take with or without food. Less potent than PPI. Few side effects. May take twice daily.'"
+            },
+            {
+                word: "Prokinetic",
+                tagalog: "Gamot Pampagalaw ng Tiyan",
+                category: "meds",
+                scenario: "GI motility: 'Prokinetic po yan, helps stomach empty. For GERD, gastroparesis. Take before meals. Side effects: drowsiness, diarrhea. Improves nausea and bloating.'"
+            },
+            {
+                word: "Immunosuppressant",
+                tagalog: "Gamot Pampataba ng Immune System",
+                category: "meds",
+                scenario: "Transplant medication: 'Immunosuppressant po yan, weakens immune system. For transplant or autoimmune disease. Take exactly as prescribed. Infection risk high. Avoid crowds. Report fever immediately.'"
+            },
+            {
+                word: "Chemotherapy Agent",
+                tagalog: "Gamot sa Cancer",
+                category: "meds",
+                scenario: "Cancer treatment: 'Chemotherapy po yan, kills cancer cells. Many side effects: nausea, hair loss, low blood counts. Antiemetics given. Avoid infection. May need growth factors. Multiple cycles needed.'"
+            },
+            {
+                word: "Opioid Analgesic",
+                tagalog: "Malakas na Gamot sa Sakit",
+                category: "meds",
+                scenario: "Strong pain medication: 'Opioid po yan, strong pain reliever. For severe pain. Constipating, take stool softener. Drowsiness. Addiction risk. Take as prescribed only. Don't share. Secure storage.'"
+            },
+            {
+                word: "NSAID",
+                tagalog: "Pain Reliever / Anti-inflammatory",
+                category: "meds",
+                scenario: "Pain medication: 'NSAID po yan like ibuprofen. For pain, inflammation, fever. Take with food. Can irritate stomach. Affects kidneys if long-term. Avoid if bleeding risk or kidney disease.'"
+            },
+            {
+                word: "Antipyretic",
+                tagalog: "Gamot sa Lagnat",
+                category: "meds",
+                scenario: "Fever reducer: 'Antipyretic po yan, paracetamol or ibuprofen. Reduces fever. Every 4-6 hours as needed. Don't exceed max dose. Overdose can damage liver. Alternate if combining two types.'"
+            },
+            {
+                word: "Antihypertensive",
+                tagalog: "Gamot sa High Blood",
+                category: "meds",
+                scenario: "BP medication: 'Antihypertensive po yan, lowers blood pressure. Many types available. Take daily mismo time. Monitor BP at home. Lifestyle changes din importante. Usually lifelong medication.'"
+            },
+            {
+                word: "Hypoglycemic Agent",
+                tagalog: "Gamot sa Diabetes",
+                category: "meds",
+                scenario: "Diabetes medication: 'Oral hypoglycemic po yan, lowers blood sugar. For type 2 diabetes. Take with meals. Monitor blood sugar. Side effect: low sugar. Carry candy always. Diet and exercise din.'"
+            },
+            {
+                word: "Thyroid Hormone",
+                tagalog: "Gamot sa Thyroid",
+                category: "meds",
+                scenario: "Hormone replacement: 'Levothyroxine po yan, thyroid hormone replacement. For hypothyroidism. Take empty stomach, 30 minutes before breakfast. Lifelong. Regular thyroid function tests. Exact dose importante.'"
+            },
+            {
+                word: "Anticonvulsant",
+                tagalog: "Gamot sa Atake",
+                category: "meds",
+                scenario: "Seizure medication: 'Anticonvulsant po yan, prevents seizures. For epilepsy. Take regularly mismo time. Don't skip doses. Don't stop abruptly. May cause drowsiness. Regular drug levels. Avoid pregnancy if possible.'"
+            },
+            {
+                word: "Antipsychotic",
+                tagalog: "Gamot sa Mental Illness",
+                category: "meds",
+                scenario: "Psychiatric medication: 'Antipsychotic po yan, for schizophrenia or bipolar. Helps manage hallucinations, delusions. Side effects: weight gain, drowsiness, movement disorders. Regular monitoring. Don't stop suddenly.'"
+            },
+            {
+                word: "Antidepressant",
+                tagalog: "Gamot sa Depression",
+                category: "meds",
+                scenario: "Depression treatment: 'Antidepressant po yan, improves mood. Takes 4-6 weeks to work fully. Continue kahit better na. Don't stop abruptly. Side effects: nausea, insomnia. Regular psychiatric follow-up.'"
+            },
+            {
+                word: "Anxiolytic",
+                tagalog: "Gamot sa Anxiety",
+                category: "meds",
+                scenario: "Anti-anxiety: 'Anxiolytic po yan, reduces anxiety. May be addictive kaya short-term use. Causes drowsiness. No driving. No alcohol. Therapy din importante, hindi lang medication. Gradual tapering pag stop.'"
+            },
+            {
+                word: "Sedative",
+                tagalog: "Pampatulog",
+                category: "meds",
+                scenario: "Sleep medication: 'Sedative po yan, for insomnia. Short-term use only. Take before bed. May cause next-day drowsiness. Dependency risk. Sleep hygiene importante. Behavioral therapy preferred long-term.'"
+            },
+            {
+                word: "Muscle Relaxant",
+                tagalog: "Gamot sa Kalamunan",
+                category: "meds",
+                scenario: "Muscle spasm: 'Muscle relaxant po yan, for muscle spasms or back pain. Causes drowsiness. No driving. Physical therapy din. Usually short-term use. May be addictive. Take at night preferred.'"
+            },
+            {
+                word: "Antihistamine",
+                tagalog: "Gamot sa Allergy",
+                category: "meds",
+                scenario: "Allergy medication: 'Antihistamine po yan, for allergic reactions, itching, runny nose. Older types cause drowsiness. Newer ones non-sedating. Take as needed or daily depending on type. Avoid alcohol.'"
+            },
+            {
+                word: "Decongestant",
+                tagalog: "Gamot sa Sipon",
+                category: "meds",
+                scenario: "Nasal congestion: 'Decongestant po yan, opens nasal passages. For colds, allergies. May increase BP and heart rate. Avoid if hypertensive. Short-term use only. Nasal spray max 3 days.'"
+            },
+            {
+                word: "Expectorant",
+                tagalog: "Gamot Pampalakas ng Plema",
+                category: "meds",
+                scenario: "Cough medication: 'Expectorant po yan, loosens phlegm para madaling ilabas. For productive cough. Drink plenty of water. Don't suppress cough, need lumabas ang plema. Take until cough resolves.'"
+            },
+            {
+                word: "Antitussive",
+                tagalog: "Gamot Pantigil ng Ubo",
+                category: "meds",
+                scenario: "Cough suppressant: 'Antitussive po yan, stops dry cough. For non-productive cough only. Don't use if may plema. May cause drowsiness. Codeine-based types may be addictive.'"
+            },
+            {
+                word: "Antidiarrheal",
+                tagalog: "Gamot sa Pagtatae",
+                category: "meds",
+                scenario: "Diarrhea treatment: 'Antidiarrheal po yan, slows bowel movements. For diarrhea. Don't use if bloody stools or high fever. Rehydration more importante. Oresol. If persists, see doctor.'"
+            },
+            {
+                word: "Laxative",
+                tagalog: "Pampalabas ng Dumi",
+                category: "meds",
+                scenario: "Constipation relief: 'Laxative po yan, softens stool or stimulates bowel. Different types available. Don't use regularly, may cause dependency. Increase fiber and water muna. Take at night.'"
+            },
+            {
+                word: "Antacid",
+                tagalog: "Gamot sa Timpla",
+                category: "meds",
+                scenario: "Heartburn relief: 'Antacid po yan, neutralizes stomach acid. Immediate relief. Chewable or liquid. Take after meals. Short-term use. If frequent, need stronger medication like PPI.'"
+            },
+            {
+                word: "Probiotic",
+                tagalog: "Good Bacteria",
+                category: "meds",
+                scenario: "Gut health: 'Probiotic po yan, good bacteria for gut. For diarrhea, after antibiotics, IBS. Helps restore normal flora. Take with or without food. Refrigerate some types. Generally safe.'"
+            },
+            {
+                word: "Antiemetic",
+                tagalog: "Gamot sa Pagsusuka",
+                category: "meds",
+                scenario: "Nausea medication: 'Antiemetic po yan, stops vomiting and nausea. For motion sickness, chemotherapy, pregnancy. May cause drowsiness. Different types for different causes. Take before travel if motion sickness.'"
+            },
+            {
+                word: "Appetite Stimulant",
+                tagalog: "Pampataba / Pampagana",
+                category: "meds",
+                scenario: "Weight gain: 'Appetite stimulant po yan, increases hunger. For weight loss, cancer patients, elderly. May cause drowsiness. Small frequent meals pa rin. Monitor weight weekly.'"
+            },
+            {
+                word: "Vitamin Supplement",
+                tagalog: "Bitamina",
+                category: "meds",
+                scenario: "Nutritional support: 'Vitamin supplement po yan, for deficiencies or prevention. Take with food for better absorption. Don't exceed recommended dose. Balanced diet pa rin importante. Regular monitoring if therapeutic dose.'"
+            },
+            {
+                word: "Iron Supplement",
+                tagalog: "Bakal / Iron",
+                category: "meds",
+                scenario: "Anemia treatment: 'Iron supplement po yan, for anemia. Take with vitamin C for absorption. Empty stomach better but may upset stomach. Black stool normal. Constipating. Takes 3 months to replenish stores.'"
+            },
+            {
+                word: "Calcium Supplement",
+                tagalog: "Calcium / Buto",
+                category: "meds",
+                scenario: "Bone health: 'Calcium supplement po yan, for bone strength. For osteoporosis prevention. Take with vitamin D. Spread throughout day. With food. Not with iron. Adequate dose for age.'"
+            },
+            {
+                word: "Topical Antibiotic",
+                tagalog: "Antibiotic Ointment / Pahid",
+                category: "meds",
+                scenario: "Wound care: 'Topical antibiotic po yan, ointment sa sugat. Prevents infection. Clean wound first. Thin layer. Cover with gauze. 2-3x daily. If redness spreads, oral antibiotics needed.'"
+            },
+            {
+                word: "Topical Steroid",
+                tagalog: "Steroid Cream",
+                category: "meds",
+                scenario: "Skin inflammation: 'Topical steroid po yan, for itchy rashes, eczema. Apply thin layer. Don't use on face long-term. May thin skin if overused. Different strengths available. As prescribed only.'"
+            },
+            {
+                word: "Antifungal",
+                tagalog: "Gamot sa Fungus",
+                category: "meds",
+                scenario: "Fungal infection: 'Antifungal po yan, for fungus like athlete's foot, candidiasis. Oral or topical. Complete full course. Keep area dry. Change socks/underwear frequently. May take weeks.'"
+            },
+            {
+                word: "Antiviral",
+                tagalog: "Gamot sa Virus",
+                category: "meds",
+                scenario: "Viral infection: 'Antiviral po yan, for specific viruses like herpes, flu, HIV. Start early for effectiveness. Complete course. Different antivirals for different viruses. May have side effects.'"
+            },
+            {
+                word: "Antiparasitic",
+                tagalog: "Gamot sa Parasito",
+                category: "meds",
+                scenario: "Parasite treatment: 'Antiparasitic po yan, kills parasites like amoeba, worms. Single dose usually or short course. May cause nausea. Treat whole family if indicated. Good hygiene prevents reinfection.'"
+            },
+            {
+                word: "Local Anesthetic",
+                tagalog: "Pamanhid / Anesthesia",
+                category: "meds",
+                scenario: "Numbing medication: 'Local anesthetic po yan, pamanhid sa area lang. For minor procedures, suturing. Numb ang area for 1-2 hours. May feel pressure pero walang sakit. Epinephrine prolongs effect.'"
+            },
+            {
+                word: "Contrast Dye",
+                tagalog: "Dye para sa X-ray",
+                category: "meds",
+                scenario: "Imaging procedure: 'Contrast dye po yan, injected for CT scan or angiogram. Makes vessels visible. Warm sensation normal. Allergy risk. Drink water after to flush out. Check kidney function first.'"
+            },
+            {
+                word: "Electrolyte Solution",
+                tagalog: "Oresol / Electrolytes",
+                category: "meds",
+                scenario: "Rehydration: 'Electrolyte solution po yan like oresol, replaces fluids and minerals. For dehydration from diarrhea, vomiting. Better than plain water. Sip slowly. Homemade: salt, sugar, water.'"
+            },
+            {
+                word: "Blood Products",
+                tagalog: "Produkto ng Dugo",
+                category: "meds",
+                scenario: "Transfusion: 'Blood products po yan - whole blood, packed RBC, platelets, plasma, cryoprecipitate. Type-specific. Cross-matched. Monitor for reactions. Slowly for first 15 minutes. Takes 2-4 hours.'"
+            },
+            {
+                word: "Albumin",
+                tagalog: "Albumin / Protein",
+                category: "meds",
+                scenario: "Plasma expander: 'Albumin po yan, protein solution for volume expansion. For shock, low albumin, ascites. IV infusion. Monitor vital signs. Allergic reaction possible. Increases blood volume quickly.'"
+            },
+            {
+                word: "Heparin",
+                tagalog: "Heparin / Blood Thinner",
+                category: "meds",
+                scenario: "Anticoagulation: 'Heparin po yan, IV blood thinner. For DVT, PE, during procedures. Continuous infusion or subcutaneous. Regular PTT monitoring. Bleeding risk. Antidote available if needed.'"
+            },
+            {
+                word: "Epinephrine",
+                tagalog: "Epinephrine / Emergency Drug",
+                category: "meds",
+                scenario: "Emergency medication: 'Epinephrine po yan, for cardiac arrest, severe allergic reactions. Intramuscular or IV. Potent vasoconstrictor. Restarts heart, opens airways. Life-saving drug. Side effects: tremors, palpitations.'"
+            },
+            {
+                word: "Atropine",
+                tagalog: "Atropine",
+                category: "meds",
+                scenario: "Cardiac drug: 'Atropine po yan, increases heart rate. For bradycardia. During codes. IV push. Side effects: dry mouth, blurred vision, confusion. Monitor response closely.'"
+            },
+            {
+                word: "Dopamine",
+                tagalog: "Dopamine / Pressor",
+                category: "meds",
+                scenario: "BP support: 'Dopamine po yan, IV drip to increase BP. For shock. Continuous monitoring. Central line preferred. Titrate to BP. Can cause tissue necrosis if infiltrates. ICU drug.'"
+            },
+            {
+                word: "Morphine",
+                tagalog: "Morphine / Strong Pain Killer",
+                category: "meds",
+                scenario: "Severe pain: 'Morphine po yan, very strong pain reliever. For severe pain, MI, cancer. IV or oral. Respiratory depression risk. Naloxone antidote. Constipating. Monitor sedation level.'"
+            },
+            {
+                word: "Naloxone",
+                tagalog: "Naloxone / Opioid Antidote",
+                category: "meds",
+                scenario: "Overdose treatment: 'Naloxone po yan, reverses opioid overdose. For respiratory depression from morphine, fentanyl. IV push stat. Quick acting. May need repeat doses. Monitor closely after.'"
+            },
+            {
+                word: "Activated Charcoal",
+                tagalog: "Activated Charcoal / Uling",
+                category: "meds",
+                scenario: "Poisoning treatment: 'Activated charcoal po yan, absorbs poison in stomach. For certain ingestions. Within 1 hour effective. Black stool. Not for corrosive substances or petroleum. NG tube if unconscious.'"
+            },
+            {
+                word: "Gastric Lavage",
+                tagalog: "Paghugas ng Tiyan",
+                category: "procedures",
+                scenario: "Stomach pumping: 'Gastric lavage po, huhugas ang tiyan ninyo gamit NG tube. For poisoning or overdose. Flush with saline repeatedly. Uncomfortable. Done in ER. Send sample to lab.'"
+            },
+            {
+                word: "Foley Catheter Insertion",
+                tagalog: "Pagkabit ng Foley",
+                category: "procedures",
+                scenario: "Catheter placement: 'Maglalagay po ako ng Foley catheter. Clean area first. Sterile technique. May pressure sensation. Inflate balloon to secure. Connect to bag. Check urine flow. Document output.'"
+            },
+            {
+                word: "Nasogastric Tube Insertion",
+                tagalog: "Pagkabit ng NG Tube",
+                category: "procedures",
+                scenario: "NG insertion: 'Ipapasok ko po ang NG tube sa ilong papunta sa tiyan. Measure nose to ear to xiphoid. Lubricate. Swallow pag sinabi ko. Uncomfortable pero kailangan. Confirm placement before use.'"
+            },
+            {
+                word: "Intravenous Insertion",
+                tagalog: "Pagkabit ng Dextrose",
+                category: "procedures",
+                scenario: "IV insertion: 'Maglalagay po ako ng IV line sa kamay ninyo. Tourniquet muna. Alcohol. Sharp sting lang. Flash of blood means in vein. Secure with tape. Report pain, swelling.'"
+            },
+            {
+                word: "Blood Glucose Monitoring",
+                tagalog: "Pag-check ng Blood Sugar",
+                category: "procedures",
+                scenario: "Glucose check: 'Kukunan ko po ng dugo sa daliri para check blood sugar. Alcohol, prick, squeeze gently. Wait for result. Normal fasting: below 100. After meal: below 140. Record result.'"
+            },
+            {
+                word: "Oxygen Administration",
+                tagalog: "Pagbigay ng Oxygen",
+                category: "procedures",
+                scenario: "Giving oxygen: 'Bibigyan ko po kayo ng oxygen. Nasal cannula or mask depending on need. 2-6 liters usually. Monitor saturation. Humidified if high flow. No smoking with oxygen on.'"
+            },
+            {
+                word: "Wound Care",
+                tagalog: "Pag-aalaga ng Sugat",
+                category: "procedures",
+                scenario: "Dressing change: 'Papalitan ko po ang takip ng sugat. Remove old dressing. Clean with saline or betadine. Pat dry. Apply ointment. New sterile gauze. Secure with tape. Check daily for infection.'"
+            },
+            {
+                word: "Sterile Technique",
+                tagalog: "Sterile na Pamamaraan",
+                category: "procedures",
+                scenario: "Maintaining sterility: 'Sterile technique po ito, para walang bacteria. Sterile gloves, sterile field. Don't touch anything non-sterile. For wounds, catheters, IV insertion. Prevents infection.'"
+            },
+            {
+                word: "Aseptic Technique",
+                tagalog: "Clean na Pamamaraan",
+                category: "procedures",
+                scenario: "Clean procedure: 'Aseptic technique po, clean but not sterile. Hand hygiene. Clean gloves. For oral care, suctioning. Less strict than sterile. Still prevents infection spread.'"
+            },
+            {
+                word: "Hand Hygiene",
+                tagalog: "Paghugas ng Kamay",
+                category: "procedures",
+                scenario: "Infection prevention: 'Hand hygiene po, most importante sa infection control. Soap and water or alcohol-based rub. Before and after patient contact. Before clean procedures. After removing gloves. 20 seconds minimum.'"
+            },
+            {
+                word: "Standard Precautions",
+                tagalog: "Standard na Pag-iingat",
+                category: "procedures",
+                scenario: "Universal precautions: 'Standard precautions po, for ALL patients. Hand hygiene. Gloves if touching body fluids. Mask if splash risk. Proper disposal. Assume lahat infectious. Basic infection control.'"
+            },
+            {
+                word: "Contact Precautions",
+                tagalog: "Contact Isolation",
+                category: "procedures",
+                scenario: "MRSA patient: 'Contact precautions po. Gown and gloves required. Dedicated equipment. Private room preferred. Prevent spread of resistant bacteria. Remove PPE before leaving room.'"
+            },
+            {
+                word: "Droplet Precautions",
+                tagalog: "Droplet Isolation",
+                category: "procedures",
+                scenario: "Meningitis patient: 'Droplet precautions po. Surgical mask within 3 feet. Private room. For diseases spread by cough/sneeze. Like meningitis, influenza. Not airborne, short distance transmission.'"
+            },
+            {
+                word: "Airborne Precautions",
+                tagalog: "Airborne Isolation",
+                category: "procedures",
+                scenario: "TB patient: 'Airborne precautions po. N95 mask required. Negative pressure room. Door closed. TB, measles, chickenpox. Can travel long distances through air. Fit-test ng N95 importante.'"
+            },
+            {
+                word: "Vital Signs Assessment",
+                tagalog: "Pag-check ng Buhay na Senyas",
+                category: "procedures",
+                scenario: "Taking vitals: 'Kukunan ko po ng vital signs: temperature, BP, pulse, respirations, oxygen saturation. Routine every 4 hours or as ordered. Baseline data. Report abnormalities. Document accurately.'"
+            },
+            {
+                word: "Physical Assessment",
+                tagalog: "Physical Exam",
+                category: "procedures",
+                scenario: "Head-to-toe: 'Gagawin ko po physical assessment, head-to-toe exam. Inspect, palpate, percuss, auscultate. Check all systems. Look for abnormalities. Compare with baseline. Document findings.'"
+            },
+            {
+                word: "Neurological Assessment",
+                tagalog: "Neuro Check",
+                category: "procedures",
+                scenario: "Neuro exam: 'Neuro assessment po. Level of consciousness, pupils, motor strength, sensation. Glasgow Coma Scale. Orientation to person, place, time. Report changes immediately. Critical for head injury, stroke.'"
+            },
+            {
+                word: "Glasgow Coma Scale",
+                tagalog: "GCS / Level of Consciousness",
+                category: "vitals",
+                scenario: "GCS scoring: 'GCS po, score ng level of consciousness. Eye opening, verbal response, motor response. Total 15 is fully alert. Below 8 is comatose. Monitor trends. Report decline stat.'"
+            },
+            {
+                word: "Pupil Check",
+                tagalog: "Pag-check ng Mata",
+                category: "procedures",
+                scenario: "PERRLA assessment: 'Pupils equal, round, reactive to light and accommodation. Check size, shape, reaction. Unequal or non-reactive is emergency. Head injury sign. Use penlight. Document size in mm.'"
+            },
+            {
+                word: "Range of Motion",
+                tagalog: "Pagkilos ng Kasukasuan",
+                category: "procedures",
+                scenario: "ROM exercises: 'Range of motion exercises po. Active if kaya ninyo, passive if hindi. Prevents contractures. All joints. Flexion, extension, rotation. Do 3x daily. Physical therapy teaches proper technique.'"
+            },
+            {
+                word: "Turning and Positioning",
+                tagalog: "Paglipat ng Posisyon",
+                category: "procedures",
+                scenario: "Pressure relief: 'Every 2 hours po papalipat-lipat ko position ninyo. Right side, back, left side. Prevents bed sores. Pillows for support. Good body alignment. Use draw sheet for heavy patients.'"
+            },
+            {
+                word: "Ambulation",
+                tagalog: "Paglalakad",
+                category: "procedures",
+                scenario: "Walking patient: 'Lakad po tayo, ambulation. Sit edge of bed first. Assess dizziness. Stand slowly. Gait belt for safety. Walker if needed. Short distance muna. Prevents complications of bed rest.'"
+            },
+            {
+                word: "Dangling",
+                tagalog: "Pag-upo sa Gilid ng Kama",
+                category: "procedures",
+                scenario: "Pre-ambulation: 'Dangle po muna kayo, upo sa gilid ng kama. Legs hanging. 5-10 minutes. Prevents orthostatic hypotension. Check BP and pulse. If tolerated, proceed to ambulation.'"
+            },
+            {
+                word: "Transfer Technique",
+                tagalog: "Paglipat ng Pasyente",
+                category: "procedures",
+                scenario: "Moving patient: 'Ililipat ko po kayo sa wheelchair. Lock brakes. Strong side muna. Pivot on good leg. Two-person assist if heavy. Proper body mechanics. Prevent injury to patient and staff.'"
+            },
+            {
+                word: "Logroll",
+                tagalog: "Pag-roll ng Pasyente",
+                category: "procedures",
+                scenario: "Spinal precautions: 'Logroll po, buong katawan sabay kumilos. For spinal injury. 3-4 people. Keep spine aligned. One person holds head. Count of three. Used for turning, placing bedpan.'"
+            },
+            {
+                word: "Code Blue Response",
+                tagalog: "Pagtugon sa Cardiac Arrest",
+                category: "procedures",
+                scenario: "Emergency response: 'Code blue! Call code team! Start CPR! Crash cart! Defibrillator! Airway management! IV access! Push drugs! Someone document! 2-minute cycles! Check rhythm!'"
+            },
+            {
+                word: "Crash Cart",
+                tagalog: "Emergency Cart",
+                category: "equipment",
+                scenario: "Emergency equipment: 'Crash cart po, emergency supplies. Defibrillator, medications, intubation equipment, IV supplies. Checked daily. Organized by drawers. Everyone should know location and contents.'"
+            },
+            {
+                word: "Bag-Valve-Mask",
+                tagalog: "Ambu Bag",
+                category: "equipment",
+                scenario: "Manual ventilation: 'Ambu bag po, manual breathing device. For apnea, respiratory failure. Seal mask, squeeze bag. Coordinate with chest compressions. Attach oxygen. 10-12 breaths per minute. Two-person technique better.'"
+            },
+            {
+                word: "Endotracheal Tube",
+                tagalog: "Tubo sa Lalamunan / ET Tube",
+                category: "equipment",
+                scenario: "Intubation: 'ET tube po, ipapasok sa trachea for ventilation. Cuffed to seal airway. Connected to ventilator. Secure properly. Note depth at teeth. Suction as needed. Oral care every shift.'"
+            },
+            {
+                word: "Laryngoscope",
+                tagalog: "Instrument para Makita ang Lalamunan",
+                category: "equipment",
+                scenario: "Intubation equipment: 'Laryngoscope po, instrument to visualize vocal cords during intubation. Different blade sizes. Check light before use. Part of airway management kit.'"
+            },
+            {
+                word: "Oropharyngeal Airway",
+                tagalog: "OPA / Airway sa Bibig",
+                category: "equipment",
+                scenario: "Airway device: 'OPA po, plastic airway inserted in mouth. Prevents tongue from blocking airway. For unconscious patients only. Remove if gag reflex returns. Different sizes available.'"
+            },
+            {
+                word: "Nasopharyngeal Airway",
+                tagalog: "NPA / Airway sa Ilong",
+                category: "equipment",
+                scenario: "Nasal airway: 'NPA po, soft tube through nose to pharynx. Keeps airway open. Tolerated better than OPA. Lubricate before insertion. Don't use if skull fracture suspected.'"
+            },
+            {
+                word: "Magill Forceps",
+                tagalog: "Magill Forceps / Pang-remove ng Foreign Body",
+                category: "equipment",
+                scenario: "Foreign body removal: 'Magill forceps po, long curved forceps. To remove foreign bodies from airway. Used during intubation. Part of difficult airway kit.'"
+            },
+            {
+                word: "Yankauer Suction",
+                tagalog: "Suction Catheter",
+                category: "equipment",
+                scenario: "Oral suctioning: 'Yankauer suction po, rigid suction catheter. For oral cavity, thick secretions. Tonsil tip. Use during codes. Clean after each use. Part of emergency equipment.'"
+            },
+            {
+                word: "Nasogastric Suction",
+                tagalog: "Suction sa NG Tube",
+                category: "procedures",
+                scenario: "Gastric decompression: 'NG to suction po, naka-connect ang NG tube sa suction machine. Removes gastric contents. Low intermittent suction usually. Measure output. Irrigate if clogged.'"
+            },
+            {
+                word: "Salem Sump",
+                tagalog: "Dalawang Butas na NG Tube",
+                category: "equipment",
+                scenario: "Double lumen NG: 'Salem sump po, two-lumen NG tube. One for suction, one for air vent. Blue pigtail should be open to air. Don't clamp blue port. For continuous suction.'"
+            },
+            {
+                word: "Levin Tube",
+                tagalog: "Single Butas na NG Tube",
+                category: "equipment",
+                scenario: "Single lumen NG: 'Levin tube po, single lumen NG tube. For feeding or intermittent suction. Simpler than Salem sump. Can be clamped. Usually for feeding.'"
+            },
+            {
+                word: "Wound Irrigation",
+                tagalog: "Paghugas ng Sugat",
+                category: "procedures",
+                scenario: "Cleaning wound: 'Wound irrigation po, flush wound with saline using syringe. Removes debris, bacteria. Use 19-gauge needle, 35ml syringe for pressure. Clean from center outward. Sterile technique.'"
+            },
+            {
+                word: "Wet-to-Dry Dressing",
+                tagalog: "Basang Takip na Matutuyo",
+                category: "procedures",
+                scenario: "Debridement: 'Wet-to-dry dressing po. Saline-soaked gauze, let dry, remove with dead tissue. Mechanical debridement. Painful removal. 3x daily change. For dirty wounds. Better methods available now.'"
+            },
+            {
+                word: "Transparent Film Dressing",
+                tagalog: "Transparent na Takip",
+                category: "equipment",
+                scenario: "IV site protection: 'Transparent film dressing po, clear adhesive. For IV sites, minor wounds. Waterproof. Can see site. Change when loose or soiled. Prevents infection.'"
+            },
+            {
+                word: "Hydrocolloid Dressing",
+                tagalog: "Gel-forming Dressing",
+                category: "equipment",
+                scenario: "Wound healing: 'Hydrocolloid dressing po, gel-forming dressing. For pressure ulcers, minor burns. Moist wound healing. Change every 3-7 days. May have odor when removed, normal.'"
+            },
+            {
+                word: "Foam Dressing",
+                tagalog: "Foam na Takip",
+                category: "equipment",
+                scenario: "Exudate absorption: 'Foam dressing po, absorbs moderate to heavy drainage. For pressure ulcers, leg ulcers. Can leave several days. Non-adherent. Cushions wound.'"
+            },
+            {
+                word: "Alginate Dressing",
+                tagalog: "Seaweed Dressing",
+                category: "equipment",
+                scenario: "Heavy drainage: 'Alginate dressing po, from seaweed. For heavily draining wounds. Forms gel. Highly absorbent. Pack in deep wounds. Secondary dressing needed. Change daily.'"
+            },
+            {
+                word: "Silver Dressing",
+                tagalog: "Silver na Takip",
+                category: "equipment",
+                scenario: "Antimicrobial dressing: 'Silver dressing po, antimicrobial. For infected wounds, burns. Kills bacteria. Can leave several days. Monitor for silver sensitivity. Expensive but effective.'"
+            },
+            {
+                word: "Compression Bandage",
+                tagalog: "Mahigpit na Bendahe",
+                category: "equipment",
+                scenario: "Edema management: 'Compression bandage po, elastic wrap. For venous ulcers, edema. Apply from toes upward. Moderate pressure. Check circulation. Remove at night usually.'"
+            },
+            {
+                word: "Elastic Bandage",
+                tagalog: "Bendahe / ACE Wrap",
+                category: "equipment",
+                scenario: "Support wrap: 'Elastic bandage po, ACE wrap. For sprains, strains. Wrap snugly not tight. Check circulation. RICE protocol: Rest, Ice, Compression, Elevation.'"
+            },
+            {
+                word: "Triangular Bandage",
+                tagalog: "Tatsulok na Tela",
+                category: "equipment",
+                scenario: "Arm sling: 'Triangular bandage po, for making arm sling. Support injured arm. Fold into sling. Tie around neck. Can also use as head wrap, binder.'"
+            },
+            {
+                word: "Penrose Drain",
+                tagalog: "Rubber Drain",
+                category: "equipment",
+                scenario: "Passive drain: 'Penrose drain po, soft rubber drain. Allows fluid to escape by gravity. Pin to dressing. Advance gradually. Remove when minimal drainage. Usually 3-7 days.'"
+            },
+            {
+                word: "T-Tube Drain",
+                tagalog: "T-shaped Drain",
+                category: "equipment",
+                scenario: "Biliary drainage: 'T-tube drain po, after gallbladder surgery. Drains bile. Connected to bag. Measure output. Green-brown color normal. Clamping trial before removal.'"
+            },
+            {
+                word: "Nephrostomy Tube",
+                tagalog: "Tubo sa Kidney",
+                category: "equipment",
+                scenario: "Kidney drainage: 'Nephrostomy tube po, directly sa kidney. Drains urine. Inserted through back. Bag sa tabi. Measure output. Keep below kidney level. Secure properly, painful if pulled.'"
+            },
+            {
+                word: "Suprapubic Catheter",
+                tagalog: "Catheter sa Tiyan",
+                category: "equipment",
+                scenario: "Bladder drainage: 'Suprapubic catheter po, through abdominal wall to bladder. Alternative to Foley. For long-term use. Less infection risk. Site care important. Change per schedule.'"
+            },
+            {
+                word: "Ostomy Care",
+                tagalog: "Pag-aalaga ng Ostomy",
+                category: "procedures",
+                scenario: "Stoma management: 'Ostomy care po - colostomy, ileostomy, urostomy. Change pouch regularly. Clean stoma. Check for complications. Teach patient self-care. Diet adjustments. Support groups available.'"
+            },
+            {
+                word: "Ostomy Pouching",
+                tagalog: "Pagkabit ng Bag sa Ostomy",
+                category: "procedures",
+                scenario: "Changing ostomy bag: 'Papalitan ko po ostomy bag ninyo. Remove old pouch gently. Clean stoma with water. Pat dry. Cut opening exact size. Apply new pouch. Empty when 1/3 full.'"
+            },
+            {
+                word: "Tracheostomy Suctioning",
+                tagalog: "Pagsipsip sa Trach",
+                category: "procedures",
+                scenario: "Trach suction: 'Mag-suction po ako ng trach ninyo. Hyperoxygenate first. Sterile technique. Insert without suction. Withdraw while suctioning. 10 seconds max. 3 passes maximum. Rest between.'"
+            },
+            {
+                word: "Oral Suctioning",
+                tagalog: "Pagsipsip sa Bibig",
+                category: "procedures",
+                scenario: "Mouth care: 'Oral suction po, sipsip ng secretions sa bibig. For patients who can't swallow. Yankauer catheter. Clean technique. Prevent aspiration. Turn head to side.'"
+            },
+            {
+                word: "Deep Suctioning",
+                tagalog: "Malalim na Suction",
+                category: "procedures",
+                scenario: "Airway clearance: 'Deep suction po through nose or mouth to trachea. Sterile catheter. Pre-oxygenate. Measure catheter. Insert gently. Suction while withdrawing. Monitor tolerance.'"
+            },
+            {
+                word: "Incentive Spirometry",
+                tagalog: "Deep Breathing Exercise",
+                category: "procedures",
+                scenario: "Lung expansion: 'Spirometer exercise po. Inhale nang malalim hanggang ball umabot sa goal. Hold 5 seconds. Exhale slowly. 10 times every hour. Prevents pneumonia after surgery. Sit upright.'"
+            },
+            {
+                word: "Pursed Lip Breathing",
+                tagalog: "Pagsinghot na Parang Bumabuwa",
+                category: "procedures",
+                scenario: "Breathing technique: 'Pursed lip breathing po. Inhale through nose. Exhale slowly through pursed lips like blowing candles. Keeps airways open longer. For COPD, dyspnea. Reduces work of breathing.'"
+            },
+            {
+                word: "Diaphragmatic Breathing",
+                tagalog: "Paghingang Abdominal",
+                category: "procedures",
+                scenario: "Deep breathing: 'Diaphragmatic breathing po. Hand on abdomen. Inhale deeply, abdomen rises. Exhale slowly, abdomen falls. Uses diaphragm efficiently. For anxiety, COPD. Relaxation technique.'"
+            },
+            {
+                word: "Huff Coughing",
+                tagalog: "Pag-ubo na Mabisa",
+                category: "procedures",
+                scenario: "Effective coughing: 'Huff coughing po. Deep breath, exhale forcefully saying HUFF HUFF. Moves secretions up. Less painful than regular cough post-op. Splint incision. Bring up phlegm.'"
+            },
+            {
+                word: "Chest Percussion",
+                tagalog: "Pagtapik sa Dibdib",
+                category: "procedures",
+                scenario: "Chest physiotherapy: 'Chest percussion po, cupped hands tapikin ang chest wall. Loosens secretions. Different positions. 3-5 minutes per area. After, mag-huff cough. Effective pero time-consuming.'"
+            },
+            {
+                word: "Vibration Therapy",
+                tagalog: "Pag-vibrate sa Dibdib",
+                category: "procedures",
+                scenario: "Secretion clearance: 'Vibration therapy po, shaking chest wall during exhalation. After percussion. Helps mobilize secretions. Hand or machine. Less tiring than percussion.'"
+            },
+            {
+                word: "Sequential Therapy",
+                tagalog: "Sunod-sunod na Therapy",
+                category: "procedures",
+                scenario: "Complete respiratory care: 'Sequential therapy po: postural drainage, percussion, vibration, then coughing. Complete cycle. 4x daily. Before meals. Intensive but effective for secretion clearance.'"
+            },
+            {
+                word: "Heating Pad Application",
+                tagalog: "Paglagay ng Mainit",
+                category: "procedures",
+                scenario: "Heat therapy: 'Heating pad po, 15-20 minutes. For muscle pain, cramps. Medium heat. Don't sleep with it on. Check skin q5 minutes. Vasodilation, relaxes muscles. Remove if too hot.'"
+            },
+            {
+                word: "Cold Compress Application",
+                tagalog: "Paglagay ng Yelo",
+                category: "procedures",
+                scenario: "Cold therapy: 'Cold compress po, first 24-48 hours after injury. 15-20 minutes on, 20 off. For swelling, pain. Ice in towel. Vasoconstriction. Don't apply directly on skin.'"
+            },
+            {
+                word: "Sitz Bath",
+                tagalog: "Sitz Bath / Pag-upo sa Tubig",
+                category: "procedures",
+                scenario: "Perineal care: 'Sitz bath po, sit in warm water. For hemorrhoids, post-delivery, rectal surgery. 15-20 minutes, 3-4x daily. Warm water promotes healing. Pat dry gently after.'"
+            },
+            {
+                word: "Tepid Sponge Bath",
+                tagalog: "Paliguan ng Maligamgam",
+                category: "procedures",
+                scenario: "Fever reduction: 'Tepid sponge bath po. Lukewarm water, not cold. Wipe whole body. Focus on groin, axilla, neck. Don't use alcohol. Every 15 minutes check temp. Prevents shivering.'"
+            },
+            {
+                word: "Perineal Care",
+                tagalog: "Pag-aalaga ng Private Area",
+                category: "procedures",
+                scenario: "Hygiene care: 'Perineal care po, cleaning genital area. Front to back for females. Foley care. After bowel movement. Prevents UTI, infection. Privacy importante. Gentle cleaning.'"
+            },
+            {
+                word: "Oral Care for Unconscious",
+                tagalog: "Oral Care sa Walang Malay",
+                category: "procedures",
+                scenario: "Mouth care: 'Oral care po for comatose patient. Side-lying position. Soft toothbrush or swabs. Gentle cleaning. Suction ready. Moisturize lips. Prevent aspiration. Q2-4 hours. Prevents pneumonia.'"
+            },
+            {
+                word: "Eye Care for Unconscious",
+                tagalog: "Pag-aalaga ng Mata",
+                category: "procedures",
+                scenario: "Eye protection: 'Eye care po for unconscious. May not blink. Artificial tears. Eye patches if needed. Tape eyes closed gently if no blink reflex. Prevents corneal drying, damage.'"
+            },
+            {
+                word: "Back Massage",
+                tagalog: "Masahe sa Likod",
+                category: "procedures",
+                scenario: "Comfort measure: 'Back massage po, for comfort, circulation. Lotion. Long smooth strokes. 5-10 minutes. Relaxing. Inspect skin. Promotes sleep. Pressure relief. Human touch importante.'"
+            },
+            {
+                word: "Pain Assessment Scale",
+                tagalog: "Sukatan ng Sakit",
+                category: "vitals",
+                scenario: "Pain evaluation: 'Pain scale po - numeric 0-10, faces scale for children, FLACC for babies. Location, quality, duration, what helps, what worsens. Reassess after intervention. Pain is 5th vital sign.'"
+            },
+            {
+                word: "Fall Risk Assessment",
+                tagalog: "Assessment ng Panganib Mahulog",
+                category: "procedures",
+                scenario: "Fall prevention: 'Fall risk assessment po - age, confusion, weakness, medications, history. Morse Fall Scale. Color-coded wristband. Bed low, call bell reach, non-slip socks, frequent rounding.'"
+            },
+            {
+                word: "Braden Scale",
+                tagalog: "Pressure Ulcer Risk Assessment",
+                category: "vitals",
+                scenario: "Pressure injury risk: 'Braden scale po, assesses risk for bed sores. Scores sensory perception, moisture, activity, mobility, nutrition, friction. Below 18 is at risk. Preventive measures based on score.'"
+            },
+            {
+                word: "Intake and Output Monitoring",
+                tagalog: "Pagsukat ng Kinain at Inilabas",
+                category: "procedures",
+                scenario: "Fluid balance: 'I&O monitoring po. Measure lahat ng intake - oral, IV, tube feeding. Lahat ng output - urine, stool, vomit, drains. Every 8 hours total. Goal: balanced or positive/negative as ordered.'"
+            },
+            {
+                word: "Daily Weight",
+                tagalog: "Timbang Araw-araw",
+                category: "procedures",
+                scenario: "Weight monitoring: 'Daily weight po, same scale, same time, after void, before breakfast. For fluid status, heart failure, renal patients. 1 kg = 1 liter fluid. Report gain over 1-2 kg.'"
+            },
+            {
+                word: "Specimen Collection",
+                tagalog: "Pagkuha ng Sample",
+                category: "procedures",
+                scenario: "Lab samples: 'Specimen collection po - blood, urine, stool, sputum. Right patient, right label, right container. Proper handling. Send to lab promptly. Follow specific instructions per test type.'"
+            },
+            {
+                word: "Blood Culture Collection",
+                tagalog: "Pagkuha ng Blood Culture",
+                category: "procedures",
+                scenario: "Culture technique: 'Blood culture po, strict aseptic technique. Two sites. Alcohol, iodine. Let dry. Don't contaminate. Aerobic and anaerobic bottles. Critical for sepsis workup. Timing importante.'"
+            },
+            {
+                word: "Sputum Collection",
+                tagalog: "Pagkuha ng Plema",
+                category: "procedures",
+                scenario: "Sputum sample: 'Sputum collection po, early morning best. Rinse mouth. Deep cough. Expectorate into container. Not saliva, from lungs. For TB, pneumonia diagnosis. Send immediately.'"
+            },
+            {
+                word: "Clean Catch Urine",
+                tagalog: "Clean Catch na Ihi",
+                category: "procedures",
+                scenario: "Midstream urine: 'Clean catch urine po. Clean genitals. Start urinating, stop, catch midstream in cup. For accurate culture. Prevents contamination. First morning specimen best.'"
+            },
+            {
+                word: "24-Hour Urine Collection",
+                tagalog: "24-Oras na Ihi",
+                category: "procedures",
+                scenario: "Extended collection: '24-hour urine po. Discard first morning void. Collect ALL urine after for 24 hours including next morning. Large container. Refrigerate or ice. Last sample completes collection.'"
+            },
+            {
+                word: "Medication Administration",
+                tagalog: "Pagbigay ng Gamot",
+                category: "procedures",
+                scenario: "Five rights: 'Medication administration - 5 rights: right patient, medication, dose, route, time. Plus documentation. Check allergies. Explain to patient. Watch for side effects. Never leave meds unattended.'"
+            },
+            {
+                word: "Subcutaneous Injection",
+                tagalog: "Turók sa Taba",
+                category: "procedures",
+                scenario: "SC injection: 'Subcutaneous po, sa taba under skin. 45-90 degrees. Abdomen, thigh, arm. Insulin, heparin. Pinch skin. Quick insertion. Slow injection. Rotate sites. Aspiration not needed.'"
+            },
+            {
+                word: "Intramuscular Injection",
+                tagalog: "Turók sa Kalamnan",
+                category: "procedures",
+                scenario: "IM injection: 'Intramuscular po, sa muscle. 90 degrees. Deltoid, vastus lateralis, ventrogluteal. Z-track technique for irritating meds. Aspirate for blood. Slow injection. Massage after except for Z-track.'"
+            },
+            {
+                word: "Intradermal Injection",
+                tagalog: "Turók sa Balat",
+                category: "procedures",
+                scenario: "ID injection: 'Intradermal po, sa dermis. 10-15 degrees, bevel up. Forearm usually. Creates wheal. For allergy testing, TB test. Don't massage. Read after specified time.'"
+            },
+            {
+                word: "Z-Track Injection",
+                tagalog: "Z-Track na Turók",
+                category: "procedures",
+                scenario: "Specialized IM: 'Z-track po, pull skin to side, inject, release skin. For irritating drugs like iron. Seals medication in muscle. Prevents tracking to subcutaneous. Don't massage. Ventrogluteal site best.'"
+            },
+            {
+                word: "Intravenous Push",
+                tagalog: "Tulak sa Dextrose",
+                category: "procedures",
+                scenario: "IV push medication: 'IV push po, inject directly into IV line. Check compatibility. Slow push, observe rate. Monitor for reactions. Flush before and after. Some meds need specific push time.'"
+            },
+            {
+                word: "IV Piggyback Setup",
+                tagalog: "Pag-setup ng Piggyback",
+                category: "procedures",
+                scenario: "Secondary infusion: 'IV piggyback po, secondary bag hung higher than primary. Runs first, then back to primary. For antibiotics. Usually 30-60 minutes. Prime tubing. Check compatibility.'"
+            },
+            {
+                word: "IV Flow Rate Calculation",
+                tagalog: "Computation ng Drops",
+                category: "procedures",
+                scenario: "Manual IV regulation: 'Flow rate computation po: total volume divided by hours times drop factor divided by 60. Count drops per minute. Microdrip 60gtt/ml, macrodrip 10-20gtt/ml. Regulate manually or use pump.'"
+            },
+            {
+                word: "Heparin Lock",
+                tagalog: "Saline Lock / Heplock",
+                category: "equipment",
+                scenario: "Intermittent access: 'Heparin lock po, IV catheter with port. For intermittent meds. Flush with saline before and after use. No continuous infusion. Maintains access. Change per protocol.'"
+            },
+            {
+                word: "Blood Transfusion Procedure",
+                tagalog: "Pagbigay ng Dugo",
+                category: "procedures",
+                scenario: "Transfusion protocol: 'Blood transfusion po. Two nurses verify. Check patient ID, blood type, cross-match. Baseline vitals. Stay 15 minutes. Monitor for reactions. Slow first 50ml. Complete within 4 hours.'"
+            },
+            {
+                word: "Transfusion Reaction",
+                tagalog: "Reaksyon sa Dugo",
+                category: "conditions",
+                scenario: "Transfusion emergency: 'May transfusion reaction! Stop transfusion! Keep IV open with saline! Vitals! Notify doctor! Monitor urine output! Save blood bag and tubing! Document! May be fever, chills, back pain, hives!'"
+            },
+            {
+                word: "Hemolytic Reaction",
+                tagalog: "Sira ang Dugo",
+                category: "conditions",
+                scenario: "Acute reaction: 'Hemolytic reaction po, most serious. RBCs destroyed. Wrong blood type. Immediate: stop transfusion, fluids, monitor kidneys. Can be fatal. Prevention: careful verification always.'"
+            },
+            {
+                word: "Nasogastric Tube Feeding",
+                tagalog: "Pagpapakain sa NG Tube",
+                category: "procedures",
+                scenario: "Tube feeding: 'NG feeding po. Elevate 30-45 degrees. Check placement. Aspirate residual. If over 100ml, hold feeding. Room temperature formula. Slow infusion. Flush after. Keep elevated 1 hour.'"
+            },
+            {
+                word: "Bolus Feeding",
+                tagalog: "Feeding na Biglaan",
+                category: "procedures",
+                scenario: "Intermittent feeding: 'Bolus feeding po, 250-500ml over 30-60 minutes. Via syringe, 3-6x daily. More physiologic. Risk of aspiration. Must tolerate. Flush after each.'"
+            },
+            {
+                word: "Continuous Feeding",
+                tagalog: "Patuloy na Feeding",
+                category: "procedures",
+                scenario: "Pump feeding: 'Continuous feeding po, 24 hours via pump. Steady rate. Better tolerance. Less risk aspiration. Check residuals q4h. Hang time max 8 hours. Change bag daily.'"
+            },
+            {
+                word: "Gastric Residual",
+                tagalog: "Natira sa Tiyan",
+                category: "vitals",
+                scenario: "Residual check: 'Gastric residual po, aspirate NG to check what's left in stomach. Over 100-150ml may indicate poor emptying. Hold feeding, notify doctor. Risk for aspiration.'"
+            },
+            {
+                word: "Percutaneous Endoscopic Gastrostomy",
+                tagalog: "PEG Tube / Tubo sa Tiyan",
+                category: "equipment",
+                scenario: "PEG tube care: 'PEG tube po, permanent feeding tube through abdominal wall. Button or tube type. Rotate daily. Clean site. Check balloon weekly. More comfortable than NG. Long-term feeding.'"
+            },
+            {
+                word: "Jejunostomy Tube",
+                tagalog: "J-Tube / Tubo sa Bituka",
+                category: "equipment",
+                scenario: "J-tube feeding: 'Jejunostomy tube po, directly into small intestine. For patients who can't tolerate gastric feeding. Continuous feeding only. No bolus. Clogs easily, flush often.'"
+            },
+            {
+                word: "Enteral Nutrition",
+                tagalog: "Pagkain sa Tiyan",
+                category: "procedures",
+                scenario: "Tube feeding: 'Enteral nutrition po, feeding through GI tract. NG, G-tube, J-tube. Preferred over parenteral if gut works. Less complications. Cheaper. Maintains gut function.'"
+            },
+            {
+                word: "Parenteral Nutrition",
+                tagalog: "Pagkain sa Ugat",
+                category: "procedures",
+                scenario: "IV nutrition: 'Parenteral nutrition po, IV feeding. TPN through central line. Complete nutrition. For non-functioning gut. Monitor glucose, electrolytes. Infection risk. Transition to enteral when possible.'"
+            },
+            {
+                word: "Hyperalimentation",
+                tagalog: "Complete IV Nutrition",
+                category: "procedures",
+                scenario: "Total nutrition support: 'Hyperalimentation or TPN po. High calorie, high protein IV solution. Central line only. 24-hour infusion. Weekly labs. Wean gradually. NPO usually.'"
+            },
+            {
+                word: "Lipid Emulsion",
+                tagalog: "IV Fat / Intralipid",
+                category: "meds",
+                scenario: "Fat supplement: 'Lipid emulsion po, IV fat. White milky solution. With TPN or separate. Essential fatty acids. Calorie source. Separate line preferred. Check for cracking. Allergy to eggs or soy.'"
+            },
+            {
+                word: "Patient-Controlled Analgesia",
+                tagalog: "PCA / Kontrolado ng Pasyente ang Sakit",
+                category: "equipment",
+                scenario: "PCA pump: 'PCA po, you control pain medication. Press button for dose. Lockout interval prevents overdose. Basal rate optional. Monitor sedation score. Family should not press. Patient only.'"
+            },
+            {
+                word: "Epidural Analgesia",
+                tagalog: "Epidural Pain Relief",
+                category: "procedures",
+                scenario: "Epidural catheter: 'Epidural po, catheter in spine for pain control. Continuous infusion or bolus. Very effective. Monitor sensation, movement. Bladder function. Hypotension possible. Mark tubing clearly.'"
+            },
+            {
+                word: "Patient Teaching",
+                tagalog: "Pagtuturo sa Pasyente",
+                category: "procedures",
+                scenario: "Health education: 'Patient teaching po, explain disease, treatment, medications, diet, follow-up. Use simple terms. Teach-back method. Written instructions. Include family. Document teaching done.'"
+            },
+            {
+                word: "Discharge Planning",
+                tagalog: "Plano sa Pag-uwi",
+                category: "procedures",
+                scenario: "Preparing discharge: 'Discharge planning po. Medications reconciliation. Follow-up appointments. Home care needs. Equipment. Diet. Activity restrictions. Emergency signs. Prescriptions. Referrals if needed.'"
+            },
+            {
+                word: "Home Care Instructions",
+                tagalog: "Turo para sa Bahay",
+                category: "procedures",
+                scenario: "Going home teaching: 'Home care instructions po. Medication schedule written. Wound care. Diet. Activity. When to call doctor. Emergency numbers. Return precautions. Follow-up date confirmed.'"
+            },
+            {
+                word: "Informed Consent",
+                tagalog: "Pahintulot na May Alam",
+                category: "procedures",
+                scenario: "Consent process: 'Informed consent po, doctor explains procedure, risks, benefits, alternatives. You understand and agree. Sign form. Witness present. Can refuse. Can ask questions. Not under duress.'"
+            },
+            {
+                word: "Advance Directive",
+                tagalog: "Desisyon Para sa Hinaharap",
+                category: "procedures",
+                scenario: "End-of-life planning: 'Advance directive po, legal document stating wishes if unable to decide. Living will, healthcare proxy. DNR order. Discuss with family. Update regularly. Respect patient autonomy.'"
+            },
+            {
+                word: "Living Will",
+                tagalog: "Testamento Habang Buhay",
+                category: "procedures",
+                scenario: "Healthcare wishes: 'Living will po, document specifying treatments desired or refused in terminal condition. Life support wishes. Feeding tubes. Resuscitation. Made while competent. Legally binding.'"
+            },
+            {
+                word: "Healthcare Proxy",
+                tagalog: "Representante sa Kalusugan",
+                category: "procedures",
+                scenario: "Medical decision maker: 'Healthcare proxy po, person designated to make medical decisions if you can't. Usually family. Should know your wishes. Legal document. Different from living will.'"
+            },
+            {
+                word: "Cultural Sensitivity",
+                tagalog: "Paggalang sa Kultura",
+                category: "procedures",
+                scenario: "Culturally competent care: 'Cultural sensitivity po. Respect beliefs, practices, language. Religious considerations. Dietary restrictions. Family involvement. Communication style. Avoid assumptions. Provide interpreter if needed.'"
+            },
+            {
+                word: "Interpreter Services",
+                tagalog: "Serbisyo ng Tagasalin",
+                category: "procedures",
+                scenario: "Language assistance: 'Interpreter services po, for non-English speaking patients. Professional interpreter. Not family. Confidentiality. Accurate translation. Phone or in-person. Patient right. Important for consent.'"
+            },
+            {
+                word: "Patient Rights",
+                tagalog: "Karapatan ng Pasyente",
+                category: "procedures",
+                scenario: "Legal rights: 'Patient rights po - information, consent, refuse treatment, privacy, dignity, confidentiality, access records, file complaints. Informed of rights on admission. Respect autonomy.'"
+            },
+            {
+                word: "HIPAA",
+                tagalog: "Privacy ng Medical Records",
+                category: "procedures",
+                scenario: "Confidentiality: 'HIPAA po, protects medical information privacy. Don't discuss patients in public. Secure records. Share only with authorized persons. Patient can access own records. Violations have penalties.'"
+            },
+            {
+                word: "Chain of Custody",
+                tagalog: "Dokumentasyon ng Evidence",
+                category: "procedures",
+                scenario: "Legal evidence: 'Chain of custody po, for forensic specimens. Assault, poisoning cases. Document who handled, when, where. Seal container. Label. Witness. Maintains evidence integrity for court.'"
+            },
+            {
+                word: "Incident Report",
+                tagalog: "Report ng Aksidente",
+                category: "procedures",
+                scenario: "Documenting events: 'Incident report po, for falls, medication errors, equipment failure. Factual, objective. Time, what happened, actions taken. Not in patient chart. For quality improvement. No blame.'"
+            },
+            {
+                word: "Medication Error",
+                tagalog: "Mali sa Gamot",
+                category: "procedures",
+                scenario: "Error management: 'Medication error po. Notify physician immediately. Monitor patient. Vital signs. Document. Incident report. Tell patient if policy requires. Learn from error. System improvement.'"
+            },
+            {
+                word: "Near Miss",
+                tagalog: "Muntik na Mali",
+                category: "procedures",
+                scenario: "Error prevention: 'Near miss po, error caught before reaching patient. Report pa rin for learning. Identify system weaknesses. Celebrate catch. No punishment. Safety culture. Prevent future actual errors.'"
+            },
+            {
+                word: "Root Cause Analysis",
+                tagalog: "Pagsisiyasat ng Dahilan",
+                category: "procedures",
+                scenario: "Error investigation: 'Root cause analysis po, deep investigation of serious event. Not who but why. System factors. Multiple causes usually. Develop action plan. Prevent recurrence. Blame-free culture.'"
+            },
+            {
+                word: "Bedside Handoff",
+                tagalog: "Paghahatid sa Tabi ng Kama",
+                category: "procedures",
+                scenario: "Shift report: 'Bedside handoff po, report at patient bedside. SBAR format. Patient participates. Clarify questions. Check equipment. Safety checks. Promotes communication. Patient-centered.'"
+            },
+            {
+                word: "SBAR Communication",
+                tagalog: "Paraan ng Pag-uulat",
+                category: "procedures",
+                scenario: "Structured reporting: 'SBAR po - Situation, Background, Assessment, Recommendation. Clear, concise. For calling doctors, handoffs. Organized information. Reduces errors. Standard communication tool.'"
+            },
+            {
+                word: "Critical Lab Values",
+                tagalog: "Kritikal na Lab Results",
+                category: "vitals",
+                scenario: "Urgent results: 'Critical lab values po, extremely abnormal results. Must report immediately. Doctor notified. Document notification. Examples: K+ 6.5, glucose 40, Hgb 5. Time-sensitive.'"
+            },
+            {
+                word: "Panic Values",
+                tagalog: "Panic Lab Results",
+                category: "vitals",
+                scenario: "Life-threatening results: 'Panic values po, same as critical values. Lab calls immediately. Life-threatening levels. Require urgent intervention. Examples: platelet 20k, Na 160, pH 7.0.'"
+            },
+            {
+                word: "Time Out",
+                tagalog: "Sandaling Tigil",
+                category: "procedures",
+                scenario: "Surgical safety: 'Time out po, before procedure starts. Verify patient, site, procedure, consent. All team members participate. Prevent wrong site surgery. Universal protocol. Mandatory pause.'"
+            },
+            {
+                word: "Universal Protocol",
+                tagalog: "Standard na Proseso",
+                category: "procedures",
+                scenario: "Surgery safety checklist: 'Universal protocol po - pre-procedure verification, site marking, time out. For surgeries, invasive procedures. Prevents errors. Patient safety initiative. Team responsibility.'"
+            },
+            {
+                word: "Surgical Site Marking",
+                tagalog: "Pagmarka ng Operasyon",
+                category: "procedures",
+                scenario: "Site identification: 'Surgical site marking po, surgeon marks operative site. Patient awake when marked. Permanent marker. Visible after draping. Prevents wrong site surgery. Patient participates.'"
+            },
+            {
+                word: "Surgical Count",
+                tagalog: "Pagbilang ng Gamit",
+                category: "procedures",
+                scenario: "Instrument count: 'Surgical count po, before and after surgery. Sponges, needles, instruments. Must match. Prevents retained foreign objects. If miscount, X-ray. Document count correct.'"
+            },
+            {
+                word: "Sharps Safety",
+                tagalog: "Kaligtasan sa Tusok",
+                category: "procedures",
+                scenario: "Needle safety: 'Sharps safety po. Don't recap needles. Use safety devices. Sharps container nearby. Don't overfill. Dispose immediately. Needlestick injuries serious. Bloodborne pathogen risk.'"
+            },
+            {
+                word: "Needlestick Injury",
+                tagalog: "Aksidente sa Karayom",
+                category: "procedures",
+                scenario: "Exposure protocol: 'Needlestick injury po! Wash immediately with soap and water. Report immediately. Test source patient if possible. Post-exposure prophylaxis if indicated. HIV, Hepatitis risk. Document. Follow up testing.'"
+            },
+            {
+                word: "Bloodborne Pathogens",
+                tagalog: "Sakit sa Dugo",
+                category: "conditions",
+                scenario: "Infection risk: 'Bloodborne pathogens po - HIV, Hepatitis B, Hepatitis C. Transmitted through blood contact. Use PPE always. Standard precautions. Vaccinate Hep B. Post-exposure protocol available.'"
+            },
+            {
+                word: "Personal Protective Equipment",
+                tagalog: "PPE / Pamprotekta",
+                category: "equipment",
+                scenario: "Safety gear: 'PPE po - gloves, gown, mask, goggles. Barrier protection. Use appropriately. Don properly. Doff carefully. Dispose correctly. Protects staff and patients. Required for certain situations.'"
+            },
+            {
+                word: "N95 Respirator",
+                tagalog: "N95 Mask",
+                category: "equipment",
+                scenario: "Airborne protection: 'N95 respirator po, filters 95% particles. For TB, COVID, airborne diseases. Must be fit-tested. Seal check before use. Can reuse if not soiled. Proper disposal. More protective than surgical mask.'"
+            },
+            {
+                word: "Fit Testing",
+                tagalog: "Pagsukat ng N95",
+                category: "procedures",
+                scenario: "Respirator fitting: 'Fit testing po, ensures N95 seals properly on your face. Annual requirement. Different sizes, brands. Qualitative or quantitative test. Must pass to use N95. Proper seal critical for protection.'"
+            },
+            {
+                word: "Disaster Preparedness",
+                tagalog: "Paghahanda sa Sakuna",
+                category: "procedures",
+                scenario: "Emergency planning: 'Disaster preparedness po. Hospital emergency plan. Know your role. Triage procedures. Communication system. Resource allocation. Drills regularly. Natural disaster, mass casualty, pandemic.'"
+            },
+            {
+                word: "Triage",
+                tagalog: "Pagpili ng Priority",
+                category: "procedures",
+                scenario: "Emergency prioritization: 'Triage po, sort patients by severity. Red-immediate, Yellow-delayed, Green-minor, Black-deceased. In disasters, mass casualties. Treat most salvageable first. Difficult decisions.'"
+            },
+            {
+                word: "Mass Casualty Incident",
+                tagalog: "Maraming Biktima",
+                category: "procedures",
+                scenario: "Disaster response: 'Mass casualty incident po, victims exceed resources. Activate disaster plan. Triage. Prioritize. Command center. Resource management. All hands on deck. Communication critical.'"
+            },
+            {
+                word: "Decontamination",
+                tagalog: "Paglilinis ng Kontaminasyon",
+                category: "procedures",
+                scenario: "Hazmat exposure: 'Decontamination po, remove contaminants. Chemical, biological, radioactive. Remove clothes. Wash thoroughly. Contain runoff. PPE for staff. Before entering hospital. Prevent secondary exposure.'"
+            },
+            {
+                word: "Bioterrorism",
+                tagalog: "Atake ng Biological Weapon",
+                category: "conditions",
+                scenario: "Biological threat: 'Bioterrorism po, deliberate release of biological agents. Anthrax, smallpox, plague. Recognize symptoms. Isolation. Notify authorities. PPE. Treatment protocols. Public health emergency.'"
+            },
+            {
+                word: "Quarantine",
+                tagalog: "Pagkakahiwalay",
+                category: "procedures",
+                scenario: "Disease containment: 'Quarantine po, separate exposed persons before symptoms. Prevent disease spread. Monitoring period. Different from isolation. Public health measure. Legal authority. Pandemic response.'"
+            },
+            {
+                word: "Contact Tracing",
+                tagalog: "Paghahanap ng Nakasalamuha",
+                category: "procedures",
+                scenario: "Outbreak investigation: 'Contact tracing po, identify persons exposed to contagious disease. Interview patient. List contacts. Notify contacts. Test. Quarantine if needed. Break transmission chain. COVID example.'"
+            }
+        ];
+
+        let currentFilter = 'all';
+        let searchTerm = '';
+
+        function renderTerms() {
+            const content = document.getElementById('content');
+            const filtered = dictionary.filter(term => {
+                const matchesCategory = currentFilter === 'all' || term.category === currentFilter;
+                const matchesSearch = term.word.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                                    term.tagalog.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                    term.scenario.toLowerCase().includes(searchTerm.toLowerCase());
+                return matchesCategory && matchesSearch;
+            });
+
+            if (filtered.length === 0) {
+                content.innerHTML = '<div class="no-results">No terms found. Try a different search or filter.</div>';
+                document.getElementById('stats').textContent = 'No results found';
+                return;
+            }
+
+            content.innerHTML = filtered.map(term => `
+                <div class="term-card">
+                    <div class="term-header">
+                        <div class="term-word">${term.word}</div>
+                        <div class="term-category">${term.category}</div>
+                    </div>
+                    <div class="term-translation">${term.tagalog}</div>
+                    <div class="term-scenario">
+                        <div class="scenario-title">💬 Real Scenario:</div>
+                        <div class="scenario-text">${term.scenario}</div>
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('stats').textContent = `Showing ${filtered.length} of ${dictionary.length} terms`;
+        }
+
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentFilter = this.dataset.category;
+                renderTerms();
+            });
+        });
+
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            searchTerm = e.target.value;
+            renderTerms();
+        });
+
+        renderTerms();
+    </script>
+</body>
+</html>
